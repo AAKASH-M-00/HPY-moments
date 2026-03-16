@@ -1,0 +1,45 @@
+/* Hide scrollbar for horizontal scrolling but keep functionality */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Smooth scroll and base typography */
+html { scroll-behavior: smooth; }
+body { -webkit-font-smoothing: antialiased; }
+
+/* View transitions */
+.view-section {
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+.view-section.active {
+    display: block;
+    opacity: 1;
+}
+
+/* Scroll Animations */
+.fade-in-up {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+.fade-in-up.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Custom Date Picker Indicator Hide */
+input[type="date"]::-webkit-calendar-picker-indicator {
+    opacity: 0.6;
+    cursor: pointer;
+}
+
+/* Glassmorphism utility for search bar inputs to ensure text is readable */
+.glass-input-hover:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}

@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HPY Moments - Find Your Next Perfect Stay</title>
+    
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: '#ff5a5f',
+                        'brand-dark': '#e0484d',
+                        dark: '#222222',
+                        light: '#f7f7f7'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'float': '0 10px 40px -10px rgba(0,0,0,0.1)',
+                        'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.15)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-white text-dark font-sans flex flex-col min-h-screen">
+
+    <!-- Navigation Bar -->
+    <nav class="fixed top-6 left-1/2 -translate-x-1/2 z-50 bg-white/80 backdrop-blur-lg border border-white/30 rounded-full transition-all duration-300 shadow-2xl" id="navbar" style="width: calc(100% - 2rem); max-width: 90rem;">
+        <div class="px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex-shrink-0 flex items-center cursor-pointer" onclick="navigateTo('home')">
+                    <i class="fa-solid fa-plane-departure text-brand text-2xl mr-2"></i>
+                    <span class="font-bold text-2xl tracking-tight text-brand">HPY Moments</span>
+                </div>
+
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex space-x-8 items-center">
+                    <button onclick="navigateTo('home')" class="nav-link text-gray-500 hover:text-dark font-medium transition-colors active-nav" data-target="home">Home</button>
+                    <button onclick="navigateTo('destinations')" class="nav-link text-gray-500 hover:text-dark font-medium transition-colors" data-target="destinations">Explore</button>
+                    <button onclick="navigateTo('packages')" class="nav-link text-gray-500 hover:text-dark font-medium transition-colors" data-target="packages">Packages</button>
+                    <button onclick="navigateTo('contact')" class="nav-link text-gray-500 hover:text-dark font-medium transition-colors" data-target="contact">Contact</button>
+                </div>
+
+                <!-- Auth Buttons -->
+                <div class="hidden md:flex items-center space-x-4">
+                    <button onclick="navigateTo('auth', 'login')" class="text-gray-600 hover:text-dark font-medium px-4 py-2 rounded-full hover:bg-gray-50 transition">Log in</button>
+                    <button onclick="navigateTo('auth', 'signup')" class="bg-brand hover:bg-brand-dark text-white px-6 py-2.5 rounded-full font-medium transition-colors shadow-sm">Sign Up</button>
+                </div>
+
+                <!-- Mobile menu button -->
+                <div class="md:hidden flex items-center">
+                    <button id="mobile-menu-btn" class="text-gray-600 hover:text-dark focus:outline-none p-2">
+                        <i class="fa-solid fa-bars text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Panel -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white/80 backdrop-blur-lg border border-white/30 rounded-3xl absolute left-1/2 -translate-x-1/2 shadow-2xl z-40 mt-2 w-[calc(100%-1rem)]">
+            <div class="px-4 py-6 space-y-2">
+                <button onclick="navigateTo('home'); toggleMobileMenu()" class="w-full text-left block px-3 py-3 text-base font-medium text-gray-800 hover:bg-gray-50 rounded-lg">Home</button>
+                <button onclick="navigateTo('destinations'); toggleMobileMenu()" class="w-full text-left block px-3 py-3 text-base font-medium text-gray-600 hover:bg-gray-50 rounded-lg">Destinations</button>
+                <button onclick="navigateTo('packages'); toggleMobileMenu()" class="w-full text-left block px-3 py-3 text-base font-medium text-gray-600 hover:bg-gray-50 rounded-lg">Packages</button>
+                <button onclick="navigateTo('contact'); toggleMobileMenu()" class="w-full text-left block px-3 py-3 text-base font-medium text-gray-600 hover:bg-gray-50 rounded-lg">Contact</button>
+                <div class="border-t border-gray-100 mt-4 pt-4 flex flex-col space-y-3 px-3">
+                    <button onclick="navigateTo('auth', 'login'); toggleMobileMenu()" class="w-full text-center text-gray-600 font-medium py-2.5 border border-gray-200 rounded-lg">Log in</button>
+                    <button onclick="navigateTo('auth', 'signup'); toggleMobileMenu()" class="w-full text-center bg-brand text-white font-medium py-2.5 rounded-lg">Sign Up</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow pt-24">
+
+        <!-- ================= HOME VIEW ================= -->
+        <section id="home-view" class="view-section active">
+            
+            <!-- Hero Section -->
+            <div class="relative h-[85vh] min-h-[600px] w-full flex items-center justify-center">
+                <div class="absolute inset-0 z-0">
+                    <img src="https://images.unsplash.com/photo-1499856871958-5b9627545d1a?q=80&w=2020&auto=format&fit=crop" alt="Paris" class="w-full h-full object-cover" />
+                    <div class="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-transparent"></div>
+                </div>
+
+                <div class="relative z-10 text-center px-4 w-full max-w-5xl mx-auto -mt-20">
+                    <h1 class="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 drop-shadow-lg tracking-tight fade-in-up">
+                        Find Your Next <br class="hidden md:block" /> Perfect Stay
+                    </h1>
+                    <p class="text-lg md:text-xl text-white/90 mb-10 font-medium drop-shadow-md fade-in-up" style="transition-delay: 100ms;">
+                        Discover extraordinary homes, experiences, and places around the world.
+                    </p>
+
+                    <!-- Search Bar - Glassmorphism update -->
+                    <div class="bg-white/70 backdrop-blur-md rounded-full p-2 md:p-3 shadow-glass max-w-4xl mx-auto flex flex-col md:flex-row items-center border border-white/50 divide-y md:divide-y-0 md:divide-x divide-gray-300/50 fade-in-up" style="transition-delay: 200ms;">
+                        <div class="w-full md:w-1/3 px-6 py-3 text-left glass-input-hover rounded-full cursor-pointer transition">
+                            <label class="block text-xs font-bold text-gray-900 tracking-wide drop-shadow-sm">Where</label>
+                            <input type="text" id="search-location" list="locations-datalist" placeholder="Search destinations" class="w-full bg-transparent border-none focus:ring-0 p-0 text-sm text-gray-800 placeholder-gray-600 outline-none truncate font-medium">
+                            <datalist id="locations-datalist">
+                                <!-- Populated by JS -->
+                            </datalist>
+                        </div>
+                        <div class="w-full md:w-1/4 px-6 py-3 text-left glass-input-hover rounded-full cursor-pointer transition">
+                            <label class="block text-xs font-bold text-gray-900 tracking-wide drop-shadow-sm">Check in</label>
+                            <input type="date" class="w-full bg-transparent border-none focus:ring-0 p-0 text-sm text-gray-800 outline-none font-medium">
+                        </div>
+                        <div class="w-full md:w-1/4 px-6 py-3 text-left glass-input-hover rounded-full cursor-pointer transition">
+                            <label class="block text-xs font-bold text-gray-900 tracking-wide drop-shadow-sm">Check out</label>
+                            <input type="date" class="w-full bg-transparent border-none focus:ring-0 p-0 text-sm text-gray-800 outline-none font-medium">
+                        </div>
+                        <div class="w-full md:w-auto flex-grow px-2 py-2 flex items-center justify-between glass-input-hover rounded-full cursor-pointer transition">
+                            <div class="px-4 text-left">
+                                <label class="block text-xs font-bold text-gray-900 tracking-wide drop-shadow-sm">Guests</label>
+                                <div class="text-sm text-gray-700 font-medium">Add guests</div>
+                            </div>
+                            <button onclick="handleHomeSearch()" class="bg-brand hover:bg-brand-dark text-white rounded-full h-12 w-12 md:w-auto md:px-6 flex items-center justify-center transition-colors shadow-md border border-brand/50">
+                                <i class="fa-solid fa-search md:mr-2"></i>
+                                <span class="hidden md:block font-bold">Search</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Featured Destinations Grid -->
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+                <div class="flex justify-between items-end mb-10 fade-in-up">
+                    <div>
+                        <h2 class="text-3xl font-bold tracking-tight mb-2">Featured Destinations</h2>
+                        <p class="text-gray-500">Explore top-rated locations loved by travelers.</p>
+                    </div>
+                    <button onclick="navigateTo('destinations')" class="hidden sm:block text-brand font-medium hover:underline">See all <i class="fa-solid fa-chevron-right text-sm ml-1"></i></button>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" id="home-destinations-grid">
+                    <!-- Cards will be populated by JS -->
+                </div>
+                <button onclick="navigateTo('destinations')" class="sm:hidden w-full mt-8 border border-gray-900 text-dark font-medium py-3 rounded-lg hover:bg-gray-50 transition">Show all destinations</button>
+            </div>
+
+            <!-- Popular Experiences -->
+            <div class="bg-light py-20">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <h2 class="text-3xl font-bold tracking-tight mb-2 fade-in-up">Popular Experiences</h2>
+                    <p class="text-gray-500 mb-10 fade-in-up">Activities and tours to make your trip unforgettable.</p>
+                    
+                    <div class="flex overflow-x-auto space-x-6 pb-8 no-scrollbar snap-x snap-mandatory fade-in-up">
+                        <div class="min-w-[280px] md:min-w-[320px] h-[400px] relative rounded-2xl overflow-hidden group snap-start cursor-pointer shadow-sm hover:shadow-xl transition-shadow duration-300">
+                            <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=800&auto=format&fit=crop" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="Beach">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                            <div class="absolute bottom-6 left-6 right-6">
+                                <h3 class="text-white text-2xl font-bold mb-1">Beach Retreat</h3>
+                                <p class="text-white/80 text-sm">Relax by the crystal clear waters.</p>
+                            </div>
+                        </div>
+                        <div class="min-w-[280px] md:min-w-[320px] h-[400px] relative rounded-2xl overflow-hidden group snap-start cursor-pointer shadow-sm hover:shadow-xl transition-shadow duration-300">
+                            <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=800&auto=format&fit=crop" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="Mountain">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                            <div class="absolute bottom-6 left-6 right-6">
+                                <h3 class="text-white text-2xl font-bold mb-1">Mountain Adventure</h3>
+                                <p class="text-white/80 text-sm">Hike the highest peaks.</p>
+                            </div>
+                        </div>
+                        <div class="min-w-[280px] md:min-w-[320px] h-[400px] relative rounded-2xl overflow-hidden group snap-start cursor-pointer shadow-sm hover:shadow-xl transition-shadow duration-300">
+                            <img src="https://images.unsplash.com/photo-1514565131-fce0801e5785?q=80&w=800&auto=format&fit=crop" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="City">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                            <div class="absolute bottom-6 left-6 right-6">
+                                <h3 class="text-white text-2xl font-bold mb-1">City Tours</h3>
+                                <p class="text-white/80 text-sm">Explore vibrant urban life.</p>
+                            </div>
+                        </div>
+                        <div class="min-w-[280px] md:min-w-[320px] h-[400px] relative rounded-2xl overflow-hidden group snap-start cursor-pointer shadow-sm hover:shadow-xl transition-shadow duration-300">
+                            <img src="https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?q=80&w=800&auto=format&fit=crop" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="Villa">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                            <div class="absolute bottom-6 left-6 right-6">
+                                <h3 class="text-white text-2xl font-bold mb-1">Luxury Villas</h3>
+                                <p class="text-white/80 text-sm">Stay in exclusive private homes.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Call to Action -->
+            <div class="bg-dark text-white py-16">
+                <div class="max-w-4xl mx-auto px-4 text-center fade-in-up">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-4">Ready for your next adventure?</h2>
+                    <p class="text-gray-400 mb-8 text-lg">Join thousands of travelers who book with us daily.</p>
+                    <button onclick="navigateTo('destinations')" class="bg-brand hover:bg-brand-dark text-white px-8 py-3 rounded-full font-bold text-lg transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 duration-200">Start Exploring</button>
+                </div>
+            </div>
+
+            <!-- Combo Packages -->
+            <div class="py-20 bg-white">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex flex-col md:flex-row justify-between items-end mb-10 fade-in-up">
+                        <div>
+                            <h2 class="text-3xl font-bold tracking-tight mb-2">Exclusive Combo Packages</h2>
+                            <p class="text-gray-500">Flight + Hotel + Activities all in one perfect bundle.</p>
+                        </div>
+                        <button onclick="navigateTo('packages')" class="mt-4 md:mt-0 text-brand font-medium hover:underline">View all combos <i class="fa-solid fa-chevron-right text-sm ml-1"></i></button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- Combo 1 -->
+                        <div class="flex flex-col sm:flex-row bg-gray-50 rounded-2xl overflow-hidden border border-gray-100 hover:shadow-xl transition-all duration-300 fade-in-up group">
+                            <div class="sm:w-2/5 h-56 sm:h-auto overflow-hidden relative cursor-pointer" onclick="navigateTo('packages')">
+                                <img src="https://images.unsplash.com/photo-1548013146-72479768bada?q=80&w=800&auto=format&fit=crop" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="India">
+                                <div class="absolute top-3 left-3 bg-brand text-white text-xs font-bold px-2 py-1 rounded shadow-sm">SAVE 20%</div>
+                            </div>
+                            <div class="sm:w-3/5 p-6 flex flex-col justify-between">
+                                <div>
+                                    <h3 class="text-xl font-bold text-dark mb-1">Golden Triangle India</h3>
+                                    <p class="text-sm text-gray-500 mb-4">Delhi • Agra • Jaipur (4N/5D)</p>
+                                    <div class="flex items-center gap-3 text-sm text-gray-600 mb-2"><i class="fa-solid fa-plane text-brand w-4"></i> Roundtrip Flights</div>
+                                    <div class="flex items-center gap-3 text-sm text-gray-600 mb-2"><i class="fa-solid fa-hotel text-brand w-4"></i> 4 Nights 4-Star Hotel</div>
+                                    <div class="flex items-center gap-3 text-sm text-gray-600"><i class="fa-solid fa-car text-brand w-4"></i> Private Transfers</div>
+                                </div>
+                                <div class="mt-6 flex justify-between items-center border-t border-gray-200 pt-4">
+                                    <div>
+                                        <p class="text-xs text-gray-400 line-through">₹85,000</p>
+                                        <p class="text-xl font-bold text-dark">₹68,000<span class="text-sm font-normal text-gray-500">/person</span></p>
+                                    </div>
+                                    <button onclick="navigateTo('booking')" class="bg-dark hover:bg-black text-white px-4 py-2 rounded-lg text-sm font-medium transition">Book Combo</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Combo 2 -->
+                        <div class="flex flex-col sm:flex-row bg-gray-50 rounded-2xl overflow-hidden border border-gray-100 hover:shadow-xl transition-all duration-300 fade-in-up group">
+                            <div class="sm:w-2/5 h-56 sm:h-auto overflow-hidden relative cursor-pointer" onclick="navigateTo('packages')">
+                                <img src="https://images.unsplash.com/photo-1552832230-c0197dd311b5?q=80&w=800&auto=format&fit=crop" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="Rome">
+                                <div class="absolute top-3 left-3 bg-brand text-white text-xs font-bold px-2 py-1 rounded shadow-sm">HOT DEAL</div>
+                            </div>
+                            <div class="sm:w-3/5 p-6 flex flex-col justify-between">
+                                <div>
+                                    <h3 class="text-xl font-bold text-dark mb-1">Classic Italy Tour</h3>
+                                    <p class="text-sm text-gray-500 mb-4">Rome • Florence • Venice (6N/7D)</p>
+                                    <div class="flex items-center gap-3 text-sm text-gray-600 mb-2"><i class="fa-solid fa-plane text-brand w-4"></i> Roundtrip Flights</div>
+                                    <div class="flex items-center gap-3 text-sm text-gray-600 mb-2"><i class="fa-solid fa-train text-brand w-4"></i> Inter-city Train Pass</div>
+                                    <div class="flex items-center gap-3 text-sm text-gray-600"><i class="fa-solid fa-ticket text-brand w-4"></i> Colosseum Tickets</div>
+                                </div>
+                                <div class="mt-6 flex justify-between items-center border-t border-gray-200 pt-4">
+                                    <div>
+                                        <p class="text-xs text-gray-400 line-through">₹2,10,000</p>
+                                        <p class="text-xl font-bold text-dark">₹1,75,000<span class="text-sm font-normal text-gray-500">/person</span></p>
+                                    </div>
+                                    <button onclick="navigateTo('booking')" class="bg-dark hover:bg-black text-white px-4 py-2 rounded-lg text-sm font-medium transition">Book Combo</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= AUTH VIEW ================= -->
+        <section id="auth-view" class="view-section min-h-[calc(100vh-80px)] bg-gray-50">
+            <div class="flex flex-col lg:flex-row min-h-[calc(100vh-80px)]">
+                <!-- Left Side -->
+                <div class="hidden lg:flex lg:w-1/2 relative bg-gray-900">
+                    <img src="https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?q=80&w=2070&auto=format&fit=crop" class="absolute inset-0 w-full h-full object-cover opacity-80" alt="Scenic Travel View">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
+                    <div class="absolute bottom-16 left-16 right-16 text-white">
+                        <h2 class="text-4xl lg:text-5xl font-bold mb-6 drop-shadow-lg leading-tight">Every journey begins with a single step.</h2>
+                        <p class="text-xl text-white/90 drop-shadow-md max-w-lg">Join HPY Moments to unlock exclusive deals, save your favorite destinations, and manage your bookings effortlessly.</p>
+                    </div>
+                </div>
+
+                <!-- Right Side: Forms -->
+                <div class="w-full lg:w-1/2 flex items-center justify-center p-6 md:p-12">
+                    <div class="w-full max-w-md bg-white p-8 md:p-10 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 fade-in-up">
+                        <div class="text-center mb-8">
+                            <i class="fa-solid fa-plane-departure text-brand text-4xl mb-4"></i>
+                            <h2 class="text-3xl font-bold text-dark tracking-tight" id="auth-title">Welcome Back</h2>
+                            <p class="text-gray-500 mt-2" id="auth-subtitle">Log in to continue your adventure.</p>
+                        </div>
+
+                        <!-- Auth Mode Toggles -->
+                        <div class="flex bg-gray-100 p-1.5 rounded-xl mb-8">
+                            <button id="btn-login" onclick="switchAuthMode('login')" class="w-1/2 py-2.5 text-sm font-bold rounded-lg bg-white shadow-sm text-dark transition-all duration-300">Log In</button>
+                            <button id="btn-signup" onclick="switchAuthMode('signup')" class="w-1/2 py-2.5 text-sm font-bold rounded-lg text-gray-500 hover:text-dark transition-all duration-300">Sign Up</button>
+                        </div>
+
+                        <!-- Login Form -->
+                        <form id="form-login" class="space-y-5" onsubmit="event.preventDefault(); alert('Logged in successfully!'); navigateTo('home');">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1.5">Email address</label>
+                                <input type="email" required class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-brand/30 focus:border-brand outline-none transition-all" placeholder="you@example.com">
+                            </div>
+                            <div>
+                                <div class="flex justify-between items-center mb-1.5">
+                                    <label class="block text-sm font-semibold text-gray-700">Password</label>
+                                    <a href="#" class="text-sm text-brand hover:text-brand-dark font-medium transition-colors">Forgot?</a>
+                                </div>
+                                <input type="password" required class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-brand/30 focus:border-brand outline-none transition-all" placeholder="••••••••">
+                            </div>
+                            <button type="submit" class="w-full bg-brand hover:bg-brand-dark text-white font-bold py-3.5 rounded-xl transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 mt-2">Log In</button>
+                        </form>
+
+                        <!-- Signup Form -->
+                        <form id="form-signup" class="space-y-5 hidden" onsubmit="event.preventDefault(); alert('Account created successfully!'); navigateTo('home');">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1.5">Full Name</label>
+                                <input type="text" required class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-brand/30 focus:border-brand outline-none transition-all" placeholder="Jane Doe">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1.5">Email address</label>
+                                <input type="email" required class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-brand/30 focus:border-brand outline-none transition-all" placeholder="you@example.com">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1.5">Password</label>
+                                <input type="password" required class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-brand/30 focus:border-brand outline-none transition-all" placeholder="Create a strong password">
+                            </div>
+                            <button type="submit" class="w-full bg-brand hover:bg-brand-dark text-white font-bold py-3.5 rounded-xl transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 mt-2">Create Account</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= DESTINATIONS VIEW ================= -->
+        <section id="destinations-view" class="view-section pb-20">
+            <div class="bg-light pt-10 pb-16 border-b border-gray-200">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <h1 class="text-4xl font-bold mb-6">Explore Destinations</h1>
+                    
+                    <div class="flex flex-col md:flex-row gap-4 items-center bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                        <div class="w-full md:w-1/3 relative">
+                            <i class="fa-solid fa-search absolute left-4 top-3.5 text-gray-400"></i>
+                            <input type="text" placeholder="Search a city or country" class="w-full bg-gray-50 border border-gray-200 rounded-lg pl-10 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand/50 focus:border-brand">
+                        </div>
+                        <div class="w-full md:w-auto flex space-x-2 overflow-x-auto no-scrollbar pb-1 md:pb-0">
+                            <button class="whitespace-nowrap px-4 py-2 border border-gray-200 rounded-full text-sm font-medium hover:border-dark hover:text-dark transition bg-gray-900 text-white">All Regions</button>
+                            <button class="whitespace-nowrap px-4 py-2 border border-gray-200 rounded-full text-sm font-medium text-gray-600 hover:border-dark hover:text-dark transition">Asia</button>
+                            <button class="whitespace-nowrap px-4 py-2 border border-gray-200 rounded-full text-sm font-medium text-gray-600 hover:border-dark hover:text-dark transition">Europe</button>
+                            <button class="whitespace-nowrap px-4 py-2 border border-gray-200 rounded-full text-sm font-medium text-gray-600 hover:border-dark hover:text-dark transition">North America</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 gap-y-10" id="all-destinations-grid">
+                    <!-- Populated by JS -->
+                </div>
+                
+                <div class="mt-16 text-center">
+                    <button class="bg-white border border-gray-900 text-dark font-medium px-6 py-3 rounded-lg hover:bg-gray-50 transition">Load More</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= DESTINATION DETAIL VIEW ================= -->
+        <section id="destination-detail-view" class="view-section pb-20 bg-white">
+            <div id="detail-hero" class="relative h-[60vh] min-h-[400px] w-full flex items-end pb-12 fade-in-up">
+                <div class="absolute inset-0 z-0">
+                    <img id="detail-img" src="" alt="Destination" class="w-full h-full object-cover" />
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                </div>
+                <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full text-white">
+                    <button onclick="navigateTo('home')" class="mb-6 bg-white/20 hover:bg-white/30 backdrop-blur text-white px-5 py-2.5 rounded-full text-sm font-medium transition flex items-center w-fit">
+                        <i class="fa-solid fa-arrow-left mr-2"></i> Back to Exploration
+                    </button>
+                    <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                        <div>
+                            <h1 id="detail-title" class="text-4xl md:text-5xl lg:text-6xl font-bold mb-2 drop-shadow-lg">Title</h1>
+                            <p class="text-lg md:text-xl text-white/90 drop-shadow-md flex items-center">
+                                <i class="fa-solid fa-location-dot mr-2"></i> <span id="detail-location">Location</span>
+                            </p>
+                        </div>
+                        <div class="bg-white/10 backdrop-blur-md rounded-2xl p-5 border border-white/20 text-center md:text-right md:w-56">
+                            <p class="text-sm text-white/80 mb-1 font-medium">Starting from</p>
+                            <p id="detail-price" class="text-3xl font-bold">₹0</p>
+                            <p id="detail-duration-label" class="text-xs text-white/70 mt-1">per trip</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex flex-col lg:flex-row gap-12">
+                <div class="w-full lg:w-2/3 fade-in-up">
+                    <h2 class="text-2xl font-bold mb-4 text-dark">About this destination</h2>
+                    <p id="detail-desc" class="text-gray-600 text-lg leading-relaxed mb-10"></p>
+                    
+                    <hr class="border-gray-100 mb-10">
+
+                    <h3 class="text-xl font-bold mb-6 text-dark">What this place offers</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-5 gap-x-4 mb-10">
+                        <div class="flex items-center text-gray-700 text-lg"><i class="fa-solid fa-wifi text-brand w-8 text-xl"></i> Fast & Free Wifi</div>
+                        <div class="flex items-center text-gray-700 text-lg"><i class="fa-solid fa-mug-hot text-brand w-8 text-xl"></i> Complimentary Breakfast</div>
+                        <div class="flex items-center text-gray-700 text-lg"><i class="fa-solid fa-person-swimming text-brand w-8 text-xl"></i> Infinity Pool</div>
+                        <div class="flex items-center text-gray-700 text-lg"><i class="fa-solid fa-van-shuttle text-brand w-8 text-xl"></i> Airport Shuttle</div>
+                        <div class="flex items-center text-gray-700 text-lg"><i class="fa-solid fa-spa text-brand w-8 text-xl"></i> Luxury Spa</div>
+                        <div class="flex items-center text-gray-700 text-lg"><i class="fa-solid fa-utensils text-brand w-8 text-xl"></i> In-house Restaurant</div>
+                    </div>
+                </div>
+                
+                <div class="w-full lg:w-1/3 fade-in-up" style="transition-delay: 100ms;">
+                    <div class="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-xl sticky top-28">
+                        <div class="flex justify-between items-center mb-6">
+                            <div class="text-2xl font-bold text-dark" id="detail-box-price"></div>
+                            <div class="flex items-center text-sm font-bold bg-gray-50 px-3 py-1 rounded-full">
+                                <i class="fa-solid fa-star text-brand mr-1.5"></i> <span id="detail-rating"></span>
+                            </div>
+                        </div>
+
+                        <!-- Update: Made the Reserve Section functional inputs -->
+                        <div class="border border-gray-300 rounded-xl mb-6 overflow-hidden">
+                            <div class="flex border-b border-gray-300">
+                                <div class="w-1/2 p-3 border-r border-gray-300 hover:bg-gray-50 transition">
+                                    <label for="detail-checkin" class="block text-xs font-bold text-dark uppercase mb-1 cursor-pointer">Check-in</label>
+                                    <input type="date" id="detail-checkin" class="w-full text-sm text-gray-700 focus:outline-none bg-transparent cursor-pointer">
+                                </div>
+                                <div class="w-1/2 p-3 hover:bg-gray-50 transition">
+                                    <label for="detail-checkout" class="block text-xs font-bold text-dark uppercase mb-1 cursor-pointer">Check-out</label>
+                                    <input type="date" id="detail-checkout" class="w-full text-sm text-gray-700 focus:outline-none bg-transparent cursor-pointer">
+                                </div>
+                            </div>
+                            <div class="p-3 hover:bg-gray-50 transition">
+                                <label for="detail-guests" class="block text-xs font-bold text-dark uppercase mb-1 cursor-pointer">Guests</label>
+                                <input type="number" id="detail-guests" min="1" max="10" value="1" class="w-full text-sm text-gray-700 focus:outline-none bg-transparent cursor-pointer">
+                            </div>
+                        </div>
+
+                        <button onclick="initiateBooking()" class="w-full bg-brand hover:bg-brand-dark text-white font-bold py-4 rounded-xl transition-all shadow-md hover:shadow-lg text-lg mb-4">Reserve</button>
+                        <p class="text-center text-sm text-gray-500 font-medium">You won't be charged yet</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PACKAGES VIEW ================= -->
+        <section id="packages-view" class="view-section pb-20">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+                <div class="mb-12">
+                    <h1 class="text-4xl font-bold mb-4">Top Travel Packages</h1>
+                    <p class="text-gray-500 text-lg">Curated all-inclusive trips for the perfect hassle-free vacation.</p>
+                </div>
+
+                <div class="flex flex-col space-y-8" id="packages-list">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= BOOKING VIEW ================= -->
+        <section id="booking-view" class="view-section pb-20 bg-gray-50">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                <div class="mb-8">
+                    <button onclick="navigateTo('home')" class="text-gray-500 hover:text-dark font-medium flex items-center text-sm mb-6"><i class="fa-solid fa-arrow-left mr-2"></i> Cancel booking</button>
+                    <h1 class="text-4xl font-bold mb-2">Complete your booking</h1>
+                    <p class="text-gray-500">Just a few details to secure your trip.</p>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-10">
+                    <form id="booking-form" onsubmit="handleBooking(event)">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                            <div class="space-y-6">
+                                <div>
+                                    <h3 class="text-xl font-bold mb-4 border-b pb-2">Your Information</h3>
+                                    <div class="space-y-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                                            <input type="text" required placeholder="John Doe" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                                            <input type="email" required placeholder="john@example.com" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                                            <input type="tel" required placeholder="+91 98765 43210" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="space-y-6">
+                                <div>
+                                    <h3 class="text-xl font-bold mb-4 border-b pb-2">Trip Details</h3>
+                                    <div class="space-y-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Destination</label>
+                                            <select id="booking-destination" required class="w-full border border-gray-300 rounded-lg px-4 py-2.5 bg-white focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition">
+                                                <option value="" disabled selected>Select a destination</option>
+                                                <!-- Populated dynamically or static below -->
+                                                <option value="Bali">Bali, Indonesia</option>
+                                                <option value="Paris">Paris, France</option>
+                                                <option value="Tokyo">Tokyo, Japan</option>
+                                                <option value="Goa">Goa, India</option>
+                                                <option value="New York">New York, USA</option>
+                                            </select>
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Check-in Date</label>
+                                                <input type="date" id="booking-date" required class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition text-gray-700">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Travelers</label>
+                                                <input type="number" id="booking-travelers" min="1" max="10" value="2" required class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition">
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Mode of Transport</label>
+                                            <select required class="w-full border border-gray-300 rounded-lg px-4 py-2.5 bg-white focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition">
+                                                <option value="" disabled selected>Select transport mode</option>
+                                                <option value="flight">✈️ Flight</option>
+                                                <option value="train">🚆 Train</option>
+                                                <option value="bus">🚌 Luxury Bus</option>
+                                                <option value="car">🚗 Private Transfer / Rental</option>
+                                                <option value="none">❌ No Transport Needed</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="border-t pt-6 flex flex-col sm:flex-row justify-between items-center bg-gray-50 -mx-6 -mb-6 p-6 rounded-b-2xl">
+                            <div class="text-sm text-gray-500 mb-4 sm:mb-0">
+                                <p>By clicking "Confirm Booking", you agree to our <a href="#" class="text-brand hover:underline">Terms of Service</a>.</p>
+                            </div>
+                            <button type="submit" class="w-full sm:w-auto bg-brand hover:bg-brand-dark text-white px-8 py-3 rounded-lg font-bold text-lg transition-colors shadow-md">
+                                Confirm Booking
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Success Message -->
+                    <div id="booking-success" class="hidden text-center py-10">
+                        <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <i class="fa-solid fa-check text-4xl text-green-500"></i>
+                        </div>
+                        <h2 class="text-3xl font-bold mb-4">Booking Confirmed!</h2>
+                        <p class="text-gray-500 mb-8">Thank you for booking with HPY Moments. We've sent a confirmation email with your itinerary details.</p>
+                        <button onclick="resetBooking(); navigateTo('home')" class="bg-dark text-white px-6 py-2 rounded-lg font-medium hover:bg-black transition">Return to Home</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= CONTACT VIEW ================= -->
+        <section id="contact-view" class="view-section pb-20">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                <div class="text-center mb-16">
+                    <h1 class="text-4xl font-bold mb-4">Get in Touch</h1>
+                    <p class="text-gray-500 text-lg">We're here to help you plan your perfect trip. Reach out to us!</p>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden flex flex-col md:flex-row">
+                    <div class="w-full md:w-1/2 p-8 md:p-12">
+                        <div class="mb-10 flex flex-col space-y-6">
+                            <div class="flex items-start">
+                                <div class="w-10 h-10 rounded-full bg-brand/10 flex items-center justify-center text-brand mr-4 shrink-0">
+                                    <i class="fa-solid fa-location-dot"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-dark">Office Address</h4>
+                                    <p class="text-gray-500 mt-1">JNNIE<br>Red Hills, Chennai, India</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="w-10 h-10 rounded-full bg-brand/10 flex items-center justify-center text-brand mr-4 shrink-0">
+                                    <i class="fa-solid fa-envelope"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-dark">Email Us</h4>
+                                    <p class="text-gray-500 mt-1">we@HPY moments.com</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="border-gray-100 mb-8">
+
+                        <h3 class="text-2xl font-bold mb-6">Send a Message</h3>
+                        <form onsubmit="alert('Message sent successfully!'); event.preventDefault(); this.reset();">
+                            <div class="space-y-4 mb-6">
+                                <input type="text" placeholder="Your Name" required class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent bg-gray-50">
+                                <input type="email" placeholder="Your Email" required class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent bg-gray-50">
+                                <textarea rows="4" placeholder="How can we help you?" required class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent bg-gray-50 resize-none"></textarea>
+                            </div>
+                            <button type="submit" class="bg-dark hover:bg-black text-white px-8 py-3 rounded-lg font-bold transition-colors w-full sm:w-auto">Send Message</button>
+                        </form>
+                    </div>
+
+                    <div style="width:100%; height:400px;">
+  <iframe
+    src="https://www.google.com/maps?q=JNN%20Institute%20of%20Engineering%2C%20Redhills%2C%20Chennai&output=embed"
+    width="100%"
+    height="100%"
+    style="border:0;"
+    allowfullscreen=""
+    loading="lazy">
+  </iframe>
+</div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-50 border-t border-gray-200 pt-16 pb-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+                <div class="col-span-1 md:col-span-1">
+                    <div class="flex items-center mb-4 cursor-pointer" onclick="navigateTo('home')">
+                        <i class="fa-solid fa-plane-departure text-brand text-2xl mr-2"></i>
+                        <span class="font-bold text-xl tracking-tight text-dark">HPY Moments</span>
+                    </div>
+                    <p class="text-gray-500 text-sm mb-6">Discover extraordinary homes, experiences, and places around the world with our premier booking platform.</p>
+                </div>
+                <div>
+                    <h4 class="font-bold text-dark mb-4">Follow Us</h4>
+                    <div class="flex space-x-4 mb-4">
+                        <a href="#" class="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:text-brand hover:border-brand transition shadow-sm"><i class="fa-brands fa-facebook-f"></i></a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:text-brand hover:border-brand transition shadow-sm"><i class="fa-brands fa-twitter"></i></a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:text-brand hover:border-brand transition shadow-sm"><i class="fa-brands fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-200 pt-8 flex flex-col md:flex-row justify-between items-center text-sm text-gray-500">
+                <p>&copy; 2026 TravelStay, Inc. All rights reserved.</p>
+                
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="script.js"></script>
+</body>
+</html>
