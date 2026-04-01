@@ -129,6 +129,21 @@ function initiateBooking() {
     navigateTo('booking');
 }
 
+// Initiate booking from Packages section
+function initiatePackageBooking(destName) {
+    const destSelect = document.getElementById('booking-destination');
+    
+    // Check if option exists in select, if not, create it
+    let optionExists = Array.from(destSelect.options).some(opt => opt.value === destName);
+    if (!optionExists) {
+        const newOption = new Option(destName, destName);
+        destSelect.add(newOption);
+    }
+    
+    destSelect.value = destName;
+    navigateTo('booking');
+}
+
 // Logic for Home Page Search Bar
 function handleHomeSearch() {
     const searchInput = document.getElementById('search-location').value.toLowerCase().trim();
@@ -322,7 +337,7 @@ function generatePackageCard(pkg) {
                         <p class="text-sm text-gray-500">Starting from</p>
                         <p class="text-2xl font-bold text-dark">${pkg.price}</p>
                     </div>
-                    <button onclick="openBookingModal('${pkg.dest}', '${pkg.price}', ${pkg.id})" class="bg-brand hover:bg-brand-dark text-white px-6 py-3 rounded-lg font-medium transition-colors">
+                    <button onclick="initiatePackageBooking('${pkg.dest}')" class="bg-brand hover:bg-brand-dark text-white px-6 py-3 rounded-lg font-medium transition-colors">
                         Book Now
                     </button>
                 </div>
@@ -697,45 +712,36 @@ function handleBooking(e) {
         return;
     }
     
-    // Create booking object
-    const booking = {
-        id: Date.now(),
+    // Calculate Amount
+    let amount = 0;
+    let match = destinations.find(d => d.name === destination);
+    if (!match) {
+        match = packages.find(p => p.dest === destination);
+    }
+    if (match) {
+        amount = parseInt(match.price.replace('₹', '').replace(/,/g, ''));
+    } else {
+        amount = 5000; // default fallback amount
+    }
+    amount = amount * parseInt(travelers);
+    
+    // Store booking data for fake payment
+    window.bookingData = {
         name: fullName,
         email: email,
         phone: phone,
-        destination: destination,
-        checkInDate: checkInDate,
         travelers: travelers,
+        packageName: destination,
+        amount: amount,
         transport: transportMode,
-        bookingDate: new Date().toLocaleDateString()
+        checkInDate: checkInDate,
+        id: Date.now()
     };
     
-    // Save booking to current user
-    currentUser.bookings = currentUser.bookings || [];
-    currentUser.bookings.push(booking);
-    
-    // Update user in localStorage
-    const allUsers = JSON.parse(localStorage.getItem('allUsers') || '[]');
-    const userIndex = allUsers.findIndex(u => u.id === currentUser.id);
-    if (userIndex !== -1) {
-        allUsers[userIndex] = currentUser;
-        localStorage.setItem('allUsers', JSON.stringify(allUsers));
-    }
-    localStorage.setItem('currentUser', JSON.stringify(currentUser));
-    
-    // Send booking confirmation email to YOUR address (aakash121767@gmail.com)
-    const bookingMessage = `New Booking Received!\n\n=== BOOKING DETAILS ===\n\nLoggedIn User:\n- Name: ${currentUser.name}\n- Email: ${currentUser.email}\n\n=== TRAVELER INFORMATION ===\n- Full Name: ${fullName}\n- Email: ${email}\n- Phone: ${phone}\n\n=== TRIP DETAILS ===\n- Destination: ${destination}\n- Check-in Date: ${checkInDate}\n- Number of Travelers: ${travelers}\n- Transport Mode: ${transportMode}\n- Booking Date: ${new Date().toLocaleDateString()}\n\n=== CONFIRMATION ===\nBooking ID: ${booking.id}\nThank you!\n\nHP Moments Travel Website`;
-    
-    // Send to your email address
-    sendEmailToAdmin('aakash121767@gmail.com', currentUser.name, 'New Booking Confirmation', bookingMessage, booking);
-    
-    // Show success message
-    document.getElementById('booking-form').classList.add('hidden');
-    document.getElementById('booking-success').classList.remove('hidden');
-    
-    // Log booking data for verification
-    console.log('✅ Booking Submitted:', booking);
-    console.log('📧 Email sent to: aakash121767@gmail.com');
+    // Show our fake payment page
+    document.getElementById('fake-pay-dest').textContent = window.bookingData.packageName;
+    document.getElementById('fake-pay-amount').textContent = '₹' + window.bookingData.amount.toLocaleString();
+    navigateTo('payment');
 }
 
 function resetBooking() {
@@ -1054,11 +1060,14 @@ function handleRazorpaySuccess(response) {
     const bookingRecord = {
         bookingId: bookingId,
         packageName: window.bookingData.packageName,
+        destination: window.bookingData.packageName,
         name: window.bookingData.name,
         email: window.bookingData.email,
         phone: window.bookingData.phone,
         travelers: window.bookingData.travelers,
         amount: window.bookingData.amount,
+        transport: window.bookingData.transport || 'flight',
+        checkInDate: window.bookingData.checkInDate || new Date().toLocaleDateString(),
         paymentId: response.razorpay_payment_id,
         paymentSignature: response.razorpay_signature,
         paymentStatus: 'completed',
@@ -1073,8 +1082,8 @@ function handleRazorpaySuccess(response) {
     
     // Save to current user's bookings
     if (currentUser) {
-        currentUser.paymentBookings = currentUser.paymentBookings || [];
-        currentUser.paymentBookings.push(bookingRecord);
+        currentUser.bookings = currentUser.bookings || [];
+        currentUser.bookings.push(bookingRecord);
         localStorage.setItem('currentUser', JSON.stringify(currentUser));
         
         // Update in allUsers list
@@ -1128,20 +1137,22 @@ Keep this booking ID safe for your records.
         bookingRecord
     );
     
-    // Populate success page
-    document.getElementById('success-booking-id').textContent = bookingId;
-    document.getElementById('success-package-name').textContent = bookingRecord.packageName;
-    document.getElementById('success-customer-name').textContent = bookingRecord.name;
-    document.getElementById('success-customer-email').textContent = bookingRecord.email;
-    document.getElementById('success-booking-date').textContent = bookingRecord.bookingDate;
-    document.getElementById('success-travelers').textContent = bookingRecord.travelers;
-    document.getElementById('success-amount').textContent = '₹' + bookingRecord.amount.toLocaleString();
+    // Populate success page if elements exist
+    const successBookingId = document.getElementById('success-booking-id');
+    if (successBookingId) successBookingId.textContent = bookingId;
+    
+    const successPackageName = document.getElementById('success-package-name');
+    if (successPackageName) successPackageName.textContent = bookingRecord.packageName;
+
+    // Show booking success view
+    const bookingForm = document.getElementById('booking-form');
+    if (bookingForm) bookingForm.classList.add('hidden');
+    
+    const bookingSuccess = document.getElementById('booking-success');
+    if (bookingSuccess) bookingSuccess.classList.remove('hidden');
     
     // Store for WhatsApp sharing
     window.successBooking = bookingRecord;
-    
-    // Navigate to success page
-    navigateTo('success');
     
     console.log('✅ Payment successful! Booking ID:', bookingId);
     console.log('📧 Confirmation emails sent');
@@ -1156,18 +1167,49 @@ Keep this booking ID safe for your records.
 function handleRazorpayError(error) {
     console.error('❌ Payment error:', error);
     
-    // Populate failure page
     const errorMessage = error && error.description 
         ? error.description 
         : 'Payment was cancelled or failed. Please try again.';
     
-    document.getElementById('failure-error-message').textContent = errorMessage;
+    alert(errorMessage);
+}
+
+// ------------------------------------------
+// MOCK PAYMENT LOGIC (Replacing Razorpay integration)
+// ------------------------------------------
+
+function handleFakePayment(e) {
+    e.preventDefault();
+    const btn = document.getElementById('fake-pay-btn');
+    const originalText = btn.innerHTML;
     
-    // Store booking for retry
-    window.failedBooking = window.bookingData;
+    // Simulate loading
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Processing...';
+    btn.disabled = true;
     
-    // Navigate to failure page
-    navigateTo('failure');
+    setTimeout(() => {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        
+        // Mock Razorpay response object
+        const mockResponse = {
+            razorpay_payment_id: 'pay_mock_' + Math.random().toString(36).substr(2, 9),
+            razorpay_signature: 'sign_mock_simulated_success'
+        };
+        
+        // Navigate back to the booking view so the success overlay appears in the correct context
+        navigateTo('booking');
+        
+        // Pass to the success handler
+        handleRazorpaySuccess(mockResponse);
+        
+        // Reset the form
+        document.getElementById('fake-payment-form').reset();
+    }, 1500); // Wait 1.5 seconds to simulate an API call
+}
+
+function cancelFakePayment() {
+    navigateTo('booking');
 }
 
 /**
