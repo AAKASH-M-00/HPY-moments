@@ -57,9 +57,18 @@
                 </div>
 
                 <!-- Auth Buttons -->
-                <div class="hidden md:flex items-center space-x-4">
+                <div class="hidden md:flex items-center space-x-4" id="auth-buttons">
                     <button onclick="navigateTo('auth', 'login')" class="text-gray-600 hover:text-dark font-medium px-4 py-2 rounded-full hover:bg-gray-50 transition">Log in</button>
                     <button onclick="navigateTo('auth', 'signup')" class="bg-brand hover:bg-brand-dark text-white px-6 py-2.5 rounded-full font-medium transition-colors shadow-sm">Sign Up</button>
+                </div>
+                
+                <!-- Profile Button (Hidden by default) -->
+                <div class="hidden md:flex items-center space-x-4" id="profile-buttons">
+                    <button onclick="navigateTo('profile')" class="text-gray-600 hover:text-dark font-medium px-4 py-2 rounded-full hover:bg-gray-50 transition flex items-center gap-2">
+                        <i class="fa-solid fa-user-circle text-xl"></i>
+                        <span id="user-name-nav">Profile</span>
+                    </button>
+                    <button onclick="handleLogout()" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2.5 rounded-full font-medium transition-colors shadow-sm">Logout</button>
                 </div>
 
                 <!-- Mobile menu button -->
@@ -107,30 +116,30 @@
                         Discover extraordinary homes, experiences, and places around the world.
                     </p>
 
-                    <!-- Search Bar - Glassmorphism update -->
-                    <div class="bg-white/70 backdrop-blur-md rounded-full p-2 md:p-3 shadow-glass max-w-4xl mx-auto flex flex-col md:flex-row items-center border border-white/50 divide-y md:divide-y-0 md:divide-x divide-gray-300/50 fade-in-up" style="transition-delay: 200ms;">
-                        <div class="w-full md:w-1/3 px-6 py-3 text-left glass-input-hover rounded-full cursor-pointer transition">
+                    <!-- Search Bar - Glassmorphism with Mobile Optimization -->
+                    <div class="bg-white/95 md:bg-white/70 backdrop-blur-md rounded-2xl md:rounded-full p-4 md:p-3 shadow-glass w-full max-w-full sm:max-w-2xl md:max-w-4xl mx-auto flex flex-col md:flex-row items-stretch md:items-center border border-white/50 divide-y md:divide-y-0 md:divide-x divide-gray-300/50 fade-in-up" style="transition-delay: 200ms;">
+                        <div class="w-full md:w-1/3 px-3 md:px-6 py-3 text-left glass-input-hover rounded-2xl md:rounded-full cursor-pointer transition">
                             <label class="block text-xs font-bold text-gray-900 tracking-wide drop-shadow-sm">Where</label>
-                            <input type="text" id="search-location" list="locations-datalist" placeholder="Search destinations" class="w-full bg-transparent border-none focus:ring-0 p-0 text-sm text-gray-800 placeholder-gray-600 outline-none truncate font-medium">
+                            <input type="text" id="search-location" list="locations-datalist" placeholder="Search destinations" class="w-full bg-transparent border-none focus:ring-0 p-0 text-sm md:text-base text-gray-800 placeholder-gray-600 outline-none truncate font-medium">
                             <datalist id="locations-datalist">
                                 <!-- Populated by JS -->
                             </datalist>
                         </div>
-                        <div class="w-full md:w-1/4 px-6 py-3 text-left glass-input-hover rounded-full cursor-pointer transition">
+                        <div class="w-full md:w-1/4 px-3 md:px-6 py-3 text-left glass-input-hover rounded-2xl md:rounded-full cursor-pointer transition">
                             <label class="block text-xs font-bold text-gray-900 tracking-wide drop-shadow-sm">Check in</label>
-                            <input type="date" class="w-full bg-transparent border-none focus:ring-0 p-0 text-sm text-gray-800 outline-none font-medium">
+                            <input type="date" class="w-full bg-transparent border-none focus:ring-0 p-0 text-sm md:text-base text-gray-800 outline-none font-medium">
                         </div>
-                        <div class="w-full md:w-1/4 px-6 py-3 text-left glass-input-hover rounded-full cursor-pointer transition">
+                        <div class="w-full md:w-1/4 px-3 md:px-6 py-3 text-left glass-input-hover rounded-2xl md:rounded-full cursor-pointer transition">
                             <label class="block text-xs font-bold text-gray-900 tracking-wide drop-shadow-sm">Check out</label>
-                            <input type="date" class="w-full bg-transparent border-none focus:ring-0 p-0 text-sm text-gray-800 outline-none font-medium">
+                            <input type="date" class="w-full bg-transparent border-none focus:ring-0 p-0 text-sm md:text-base text-gray-800 outline-none font-medium">
                         </div>
-                        <div class="w-full md:w-auto flex-grow px-2 py-2 flex items-center justify-between glass-input-hover rounded-full cursor-pointer transition">
-                            <div class="px-4 text-left">
+                        <div class="w-full md:w-auto flex-grow px-3 md:px-2 py-3 md:py-2 flex items-center justify-between gap-3 md:gap-0 glass-input-hover rounded-2xl md:rounded-full cursor-pointer transition">
+                            <div class="px-0 md:px-4 text-left">
                                 <label class="block text-xs font-bold text-gray-900 tracking-wide drop-shadow-sm">Guests</label>
                                 <div class="text-sm text-gray-700 font-medium">Add guests</div>
                             </div>
-                            <button onclick="handleHomeSearch()" class="bg-brand hover:bg-brand-dark text-white rounded-full h-12 w-12 md:w-auto md:px-6 flex items-center justify-center transition-colors shadow-md border border-brand/50">
-                                <i class="fa-solid fa-search md:mr-2"></i>
+                            <button onclick="handleHomeSearch()" class="bg-brand hover:bg-brand-dark text-white rounded-full h-10 md:h-12 w-10 md:w-auto md:px-6 flex items-center justify-center transition-colors shadow-md border border-brand/50 flex-shrink-0">
+                                <i class="fa-solid fa-search md:mr-2 text-sm md:text-base"></i>
                                 <span class="hidden md:block font-bold">Search</span>
                             </button>
                         </div>
@@ -299,7 +308,7 @@
                         </div>
 
                         <!-- Login Form -->
-                        <form id="form-login" class="space-y-5" onsubmit="event.preventDefault(); alert('Logged in successfully!'); navigateTo('home');">
+                        <form id="form-login" class="space-y-5" onsubmit="handleLogin(event);">
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-1.5">Email address</label>
                                 <input type="email" required class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-brand/30 focus:border-brand outline-none transition-all" placeholder="you@example.com">
@@ -315,7 +324,7 @@
                         </form>
 
                         <!-- Signup Form -->
-                        <form id="form-signup" class="space-y-5 hidden" onsubmit="event.preventDefault(); alert('Account created successfully!'); navigateTo('home');">
+                        <form id="form-signup" class="space-y-5 hidden" onsubmit="handleSignup(event);">
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-1.5">Full Name</label>
                                 <input type="text" required class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-brand/30 focus:border-brand outline-none transition-all" placeholder="Jane Doe">
@@ -344,13 +353,24 @@
                     <div class="flex flex-col md:flex-row gap-4 items-center bg-white p-4 rounded-xl shadow-sm border border-gray-100">
                         <div class="w-full md:w-1/3 relative">
                             <i class="fa-solid fa-search absolute left-4 top-3.5 text-gray-400"></i>
-                            <input type="text" placeholder="Search a city or country" class="w-full bg-gray-50 border border-gray-200 rounded-lg pl-10 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand/50 focus:border-brand">
+                            <input type="text" id="explore-search-location" list="explore-locations-datalist" placeholder="Search a city or country" class="w-full bg-gray-50 border border-gray-200 rounded-lg pl-10 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand/50 focus:border-brand">
+                            <datalist id="explore-locations-datalist">
+                                <!-- Populated by JS -->
+                            </datalist>
                         </div>
                         <div class="w-full md:w-auto flex space-x-2 overflow-x-auto no-scrollbar pb-1 md:pb-0">
-                            <button class="whitespace-nowrap px-4 py-2 border border-gray-200 rounded-full text-sm font-medium hover:border-dark hover:text-dark transition bg-gray-900 text-white">All Regions</button>
-                            <button class="whitespace-nowrap px-4 py-2 border border-gray-200 rounded-full text-sm font-medium text-gray-600 hover:border-dark hover:text-dark transition">Asia</button>
-                            <button class="whitespace-nowrap px-4 py-2 border border-gray-200 rounded-full text-sm font-medium text-gray-600 hover:border-dark hover:text-dark transition">Europe</button>
-                            <button class="whitespace-nowrap px-4 py-2 border border-gray-200 rounded-full text-sm font-medium text-gray-600 hover:border-dark hover:text-dark transition">North America</button>
+                            <button class="region-filter-btn whitespace-nowrap px-4 py-2 border border-gray-900 rounded-full text-sm font-medium hover:border-dark hover:text-dark transition bg-gray-900 text-white" data-region="All Regions">All Regions</button>
+                            <button class="region-filter-btn whitespace-nowrap px-4 py-2 border border-gray-200 rounded-full text-sm font-medium text-gray-600 hover:border-dark hover:text-dark transition" data-region="Asia">Asia</button>
+                            <button class="region-filter-btn whitespace-nowrap px-4 py-2 border border-gray-200 rounded-full text-sm font-medium text-gray-600 hover:border-dark hover:text-dark transition" data-region="Europe">Europe</button>
+                            <button class="region-filter-btn whitespace-nowrap px-4 py-2 border border-gray-200 rounded-full text-sm font-medium text-gray-600 hover:border-dark hover:text-dark transition" data-region="North America">North America</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Permanent Place Suggestions Below Search -->
+                    <div id="explore-search-suggestions" class="mt-4 p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+                        <p class="text-sm font-semibold text-gray-700 mb-3">Popular places:</p>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3" id="places-grid">
+                            <!-- Populated by JS -->
                         </div>
                     </div>
                 </div>
@@ -359,10 +379,6 @@
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 gap-y-10" id="all-destinations-grid">
                     <!-- Populated by JS -->
-                </div>
-                
-                <div class="mt-16 text-center">
-                    <button class="bg-white border border-gray-900 text-dark font-medium px-6 py-3 rounded-lg hover:bg-gray-50 transition">Load More</button>
                 </div>
             </div>
         </section>
@@ -478,15 +494,15 @@
                                     <div class="space-y-4">
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                                            <input type="text" required placeholder="John Doe" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition">
+                                            <input type="text" name="fullName" required placeholder="John Doe" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition">
                                         </div>
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                                            <input type="email" required placeholder="john@example.com" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition">
+                                            <input type="email" name="email" required placeholder="john@example.com" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition">
                                         </div>
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                                            <input type="tel" required placeholder="+91 98765 43210" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition">
+                                            <input type="tel" name="phone" required placeholder="+91 98765 43210" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition">
                                         </div>
                                     </div>
                                 </div>
@@ -498,7 +514,7 @@
                                     <div class="space-y-4">
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 mb-1">Destination</label>
-                                            <select id="booking-destination" required class="w-full border border-gray-300 rounded-lg px-4 py-2.5 bg-white focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition">
+                                            <select id="booking-destination" name="destination" required class="w-full border border-gray-300 rounded-lg px-4 py-2.5 bg-white focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition">
                                                 <option value="" disabled selected>Select a destination</option>
                                                 <!-- Populated dynamically or static below -->
                                                 <option value="Bali">Bali, Indonesia</option>
@@ -511,22 +527,21 @@
                                         <div class="grid grid-cols-2 gap-4">
                                             <div>
                                                 <label class="block text-sm font-medium text-gray-700 mb-1">Check-in Date</label>
-                                                <input type="date" id="booking-date" required class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition text-gray-700">
+                                                <input type="date" id="booking-date" name="checkInDate" required class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition text-gray-700">
                                             </div>
                                             <div>
                                                 <label class="block text-sm font-medium text-gray-700 mb-1">Travelers</label>
-                                                <input type="number" id="booking-travelers" min="1" max="10" value="2" required class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition">
+                                                <input type="number" id="booking-travelers" name="travelers" min="1" max="10" value="2" required class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition">
                                             </div>
                                         </div>
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 mb-1">Mode of Transport</label>
-                                            <select required class="w-full border border-gray-300 rounded-lg px-4 py-2.5 bg-white focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition">
+                                            <select id="booking-transport" name="transport" required class="w-full border border-gray-300 rounded-lg px-4 py-2.5 bg-white focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition">
                                                 <option value="" disabled selected>Select transport mode</option>
                                                 <option value="flight">✈️ Flight</option>
                                                 <option value="train">🚆 Train</option>
                                                 <option value="bus">🚌 Luxury Bus</option>
                                                 <option value="car">🚗 Private Transfer / Rental</option>
-                                                <option value="none">❌ No Transport Needed</option>
                                             </select>
                                         </div>
                                     </div>
@@ -557,6 +572,59 @@
             </div>
         </section>
 
+        <!-- ================= PROFILE VIEW ================= -->
+        <section id="profile-view" class="view-section pb-20 bg-gray-50">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                <button onclick="navigateTo('home')" class="text-gray-500 hover:text-dark font-medium flex items-center text-sm mb-6"><i class="fa-solid fa-arrow-left mr-2"></i> Back to Home</button>
+                
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-10">
+                    <div class="flex items-center gap-6 mb-10 pb-10 border-b">
+                        <div class="w-20 h-20 rounded-full bg-brand/20 flex items-center justify-center">
+                            <i class="fa-solid fa-user text-4xl text-brand"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-4xl font-bold text-dark" id="profile-name">John Doe</h1>
+                            <p class="text-gray-500 text-lg" id="profile-email">john@example.com</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+                        <div>
+                            <h2 class="text-2xl font-bold mb-6">Account Information</h2>
+                            <div class="space-y-4">
+                                <div>
+                                    <p class="text-sm text-gray-600">Full Name</p>
+                                    <p class="text-lg font-medium text-gray-900" id="profile-full-name">John Doe</p>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-600">Email Address</p>
+                                    <p class="text-lg font-medium text-gray-900" id="profile-account-email">john@example.com</p>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-600">Member Since</p>
+                                    <p class="text-lg font-medium text-gray-900" id="profile-joined">-</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h2 class="text-2xl font-bold mb-6">Booking History</h2>
+                            <div id="profile-bookings" class="space-y-4">
+                                <p class="text-gray-500">No bookings yet</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border-t pt-6">
+                        <h2 class="text-2xl font-bold mb-6">Recent Bookings</h2>
+                        <div id="profile-all-bookings" class="space-y-4">
+                            <p class="text-gray-500">No bookings found</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- ================= CONTACT VIEW ================= -->
         <section id="contact-view" class="view-section pb-20">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -574,7 +642,7 @@
                                 </div>
                                 <div>
                                     <h4 class="font-bold text-dark">Office Address</h4>
-                                    <p class="text-gray-500 mt-1">JNNIE<br>Red Hills, Chennai, India</p>
+                                    <p class="text-gray-500 mt-1">JNNIE<br>RedHills, Chennai, India</p>
                                 </div>
                             </div>
                             <div class="flex items-start">
@@ -633,6 +701,22 @@
                     <div class="flex space-x-4 mb-4">
                         <a href="#" class="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:text-brand hover:border-brand transition shadow-sm"><i class="fa-brands fa-facebook-f"></i></a>
                         <a href="#" class="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:text-brand hover:border-brand transition shadow-sm"><i class="fa-brands fa-twitter"></i></a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:text-brand hover:border-brand transition shadow-sm"><i class="fa-brands fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-200 pt-8 flex flex-col md:flex-row justify-between items-center text-sm text-gray-500">
+                <p>&copy; 2026 TravelStay, Inc. All rights reserved.</p>
+                
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="script.js"></script>
+</body>
+</html>nds fa-twitter"></i></a>
                         <a href="#" class="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:text-brand hover:border-brand transition shadow-sm"><i class="fa-brands fa-instagram"></i></a>
                     </div>
                 </div>
