@@ -536,14 +536,38 @@ function handleLogout() {
 function updateNavbarForLoggedInUser() {
     const authButtons = document.getElementById('auth-buttons');
     const profileButtons = document.getElementById('profile-buttons');
+    const mobileAuthButtons = document.getElementById('mobile-auth-buttons');
+    const mobileProfileButtons = document.getElementById('mobile-profile-buttons');
     
     if (currentUser) {
-        authButtons.classList.add('hidden');
-        profileButtons.classList.remove('hidden');
-        document.getElementById('user-name-nav').textContent = currentUser.name;
+        if(authButtons) authButtons.classList.add('hidden');
+        if(profileButtons) profileButtons.classList.remove('hidden');
+        const deskName = document.getElementById('user-name-nav');
+        if(deskName) deskName.textContent = currentUser.name;
+        
+        if(mobileAuthButtons) {
+            mobileAuthButtons.classList.add('hidden');
+            mobileAuthButtons.classList.remove('flex');
+        }
+        
+        if(mobileProfileButtons) {
+            mobileProfileButtons.classList.remove('hidden');
+            mobileProfileButtons.classList.add('flex');
+        }
+        const mobName = document.getElementById('mobile-user-name-nav');
+        if(mobName) mobName.textContent = currentUser.name;
     } else {
-        authButtons.classList.remove('hidden');
-        profileButtons.classList.add('hidden');
+        if(authButtons) authButtons.classList.remove('hidden');
+        if(profileButtons) profileButtons.classList.add('hidden');
+        
+        if(mobileAuthButtons) {
+            mobileAuthButtons.classList.remove('hidden');
+            mobileAuthButtons.classList.add('flex');
+        }
+        if(mobileProfileButtons) {
+            mobileProfileButtons.classList.add('hidden');
+            mobileProfileButtons.classList.remove('flex');
+        }
     }
 }
 
@@ -1210,6 +1234,35 @@ function handleFakePayment(e) {
 
 function cancelFakePayment() {
     navigateTo('booking');
+}
+
+function switchPaymentMethod(method) {
+    const btnCard = document.getElementById('btn-pay-card');
+    const btnUpi = document.getElementById('btn-pay-upi');
+    const formCard = document.getElementById('card-payment-form');
+    const formUpi = document.getElementById('upi-payment-form');
+    
+    // Reset required attributes
+    const cardInputs = formCard.querySelectorAll('input');
+    const upiInput = document.getElementById('upi-input');
+
+    if (method === 'card') {
+        btnCard.className = 'w-1/2 py-2 text-sm font-bold rounded-lg bg-white shadow-sm text-dark transition-all duration-300';
+        btnUpi.className = 'w-1/2 py-2 text-sm font-bold rounded-lg text-gray-500 hover:text-dark transition-all duration-300';
+        formCard.classList.remove('hidden');
+        formUpi.classList.add('hidden');
+        
+        cardInputs.forEach(input => input.setAttribute('required', 'required'));
+        if (upiInput) upiInput.removeAttribute('required');
+    } else {
+        btnUpi.className = 'w-1/2 py-2 text-sm font-bold rounded-lg bg-white shadow-sm text-dark transition-all duration-300';
+        btnCard.className = 'w-1/2 py-2 text-sm font-bold rounded-lg text-gray-500 hover:text-dark transition-all duration-300';
+        formUpi.classList.remove('hidden');
+        formCard.classList.add('hidden');
+        
+        cardInputs.forEach(input => input.removeAttribute('required'));
+        if (upiInput) upiInput.setAttribute('required', 'required');
+    }
 }
 
 /**
