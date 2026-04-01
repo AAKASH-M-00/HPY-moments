@@ -322,8 +322,8 @@ function generatePackageCard(pkg) {
                         <p class="text-sm text-gray-500">Starting from</p>
                         <p class="text-2xl font-bold text-dark">${pkg.price}</p>
                     </div>
-                    <button onclick="navigateTo('booking')" class="bg-dark hover:bg-black text-white px-6 py-3 rounded-lg font-medium transition-colors">
-                        Book Package
+                    <button onclick="openBookingModal('${pkg.dest}', '${pkg.price}', ${pkg.id})" class="bg-brand hover:bg-brand-dark text-white px-6 py-3 rounded-lg font-medium transition-colors">
+                        Book Now
                     </button>
                 </div>
             </div>
@@ -844,4 +844,430 @@ document.addEventListener('DOMContentLoaded', () => {
     initData();
     navigateTo('home');
 });
+
+// ==========================================
+// PAYMENT SYSTEM FUNCTIONS (Razorpay)
+// ==========================================
+
+/**
+ * Opens the booking modal and populates it with package details
+ * @param {string} packageName - Name of the selected package
+ * @param {string} price - Price of the package (formatted string like "₹75,000")
+ * @param {number} packageId - ID of the package
+ */
+function openBookingModal(packageName, price, packageId) {
+    // Store current package for later use
+    window.currentPackage = {
+        name: packageName,
+        price: price.replace('₹', '').replace(/,/g, ''), // Extract numeric value
+        id: packageId
+    };
+    
+    // Populate modal with package information
+    document.getElementById('modal-package-name').textContent = packageName;
+    document.getElementById('modal-package-price').textContent = price;
+    document.getElementById('booking-travelers').value = 1; // Reset to 1
+    
+    // Update total price on load
+    updateTotalPrice();
+    
+    // Show the modal
+    document.getElementById('booking-modal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden'; // Prevent background scroll
+}
+
+/**
+ * Closes the booking modal
+ */
+function closeBookingModal() {
+    document.getElementById('booking-modal').classList.add('hidden');
+    document.body.style.overflow = 'auto'; // Restore scroll
+    // Reset form
+    const form = document.getElementById('payment-booking-form');
+    if (form) form.reset();
+}
+
+/**
+ * Updates the total price based on number of travelers
+ */
+function updateTotalPrice() {
+    const travelers = parseInt(document.getElementById('booking-travelers').value) || 1;
+    const basePrice = parseInt(window.currentPackage.price);
+    const totalPrice = basePrice * travelers;
+    
+    document.getElementById('modal-total-price').textContent = '₹' + totalPrice.toLocaleString();
+    window.currentPackage.totalPrice = totalPrice;
+}
+
+/**
+ * Handles the booking form submission
+ * Validates form data and navigates to payment page
+ */
+function handlePaymentBooking(e) {
+    e.preventDefault();
+    
+    // Check if user is logged in
+    if (!currentUser) {
+        alert('Please login first to proceed with booking');
+        closeBookingModal();
+        navigateTo('auth', 'login');
+        return;
+    }
+    
+    // Get form values
+    const name = document.getElementById('booking-name').value.trim();
+    const email = document.getElementById('booking-email').value.trim();
+    const phone = document.getElementById('booking-phone').value.trim();
+    const travelers = document.getElementById('booking-travelers').value.trim();
+    const termsAccepted = document.getElementById('terms-checkbox').checked;
+    
+    // Validate form
+    if (!name || !email || !phone || !travelers) {
+        alert('Please fill in all fields');
+        return;
+    }
+    
+    // Validate phone number (10 digits)
+    if (!/^\d{10}$/.test(phone.replace(/\D/g, ''))) {
+        alert('Please enter a valid 10-digit phone number');
+        return;
+    }
+    
+    // Validate email
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        alert('Please enter a valid email address');
+        return;
+    }
+    
+    // Check terms acceptance
+    if (!termsAccepted) {
+        alert('Please accept the terms and conditions');
+        return;
+    }
+    
+    // Store booking details globally for payment processing
+    window.bookingData = {
+        name: name,
+        email: email,
+        phone: phone,
+        travelers: travelers,
+        packageName: window.currentPackage.name,
+        amount: window.currentPackage.totalPrice,
+        timestamp: new Date()
+    };
+    
+    // Close modal and show payment page
+    closeBookingModal();
+    
+    // Populate payment page with booking summary
+    document.getElementById('pay-package-name').textContent = window.bookingData.packageName;
+    document.getElementById('pay-passenger-name').textContent = window.bookingData.name;
+    document.getElementById('pay-travelers').textContent = window.bookingData.travelers;
+    document.getElementById('pay-total-amount').textContent = '₹' + window.bookingData.amount.toLocaleString();
+    
+    // Navigate to payment view
+    navigateTo('payment');
+}
+
+/**
+ * Initiates Razorpay payment
+ * Creates a Razorpay checkout instance with test keys
+ */
+function initiateRazorpayPayment() {
+    // Validate booking data
+    if (!window.bookingData) {
+        alert('Please complete the booking form first');
+        return;
+    }
+    
+    // Get selected payment method (for reference, Razorpay handles all methods)
+    const selectedMethod = document.querySelector('input[name="payment-method"]:checked');
+    const paymentMethod = selectedMethod ? selectedMethod.value : 'card';
+    
+    // Razorpay checkout options
+    const options = {
+        // Test Key (provided by Razorpay - no real money involved)
+        key: 'rzp_test_1DP5MMOlF23ioK',
+        
+        // Amount in paise (1 rupee = 100 paise)
+        amount: window.bookingData.amount * 100,
+        
+        // Currency
+        currency: 'INR',
+        
+        // Payment description
+        name: 'HPY Moments Travel',
+        description: `Booking for ${window.bookingData.packageName}`,
+        
+        // Customer email and phone
+        prefill: {
+            name: window.bookingData.name,
+            email: window.bookingData.email,
+            contact: window.bookingData.phone
+        },
+        
+        // Razorpay theme color (matches brand color)
+        theme: {
+            color: '#ff5a5f'
+        },
+        
+        // Payment method preferences
+        method: {
+            upi: true,
+            card: true,
+            netbanking: true,
+            emandate: false,
+            cardless_emi: false,
+            paylater: false
+        },
+        
+        // Success callback
+        handler: handleRazorpaySuccess,
+        
+        // Error callback
+        modal: {
+            ondismiss: handleRazorpayError
+        }
+    };
+    
+    // Create Razorpay instance and open payment modal
+    try {
+        const razorpay = new Razorpay(options);
+        razorpay.on('payment.failed', handleRazorpayError);
+        razorpay.open();
+    } catch (error) {
+        console.error('❌ Razorpay initialization error:', error);
+        alert('Error initializing payment. Please try again.');
+    }
+}
+
+/**
+ * Handles successful Razorpay payment
+ * Generates booking ID, saves data to localStorage, sends confirmation email
+ * @param {object} response - Razorpay payment response containing transaction details
+ */
+function handleRazorpaySuccess(response) {
+    // Generate unique booking ID
+    const bookingId = 'BK' + Date.now() + Math.random().toString(36).substr(2, 9).toUpperCase();
+    
+    // Create complete booking record
+    const bookingRecord = {
+        bookingId: bookingId,
+        packageName: window.bookingData.packageName,
+        name: window.bookingData.name,
+        email: window.bookingData.email,
+        phone: window.bookingData.phone,
+        travelers: window.bookingData.travelers,
+        amount: window.bookingData.amount,
+        paymentId: response.razorpay_payment_id,
+        paymentSignature: response.razorpay_signature,
+        paymentStatus: 'completed',
+        bookingDate: new Date().toLocaleDateString('en-IN'),
+        bookingTime: new Date().toLocaleTimeString('en-IN')
+    };
+    
+    // Save booking to localStorage
+    const allBookings = JSON.parse(localStorage.getItem('allBookings') || '[]');
+    allBookings.push(bookingRecord);
+    localStorage.setItem('allBookings', JSON.stringify(allBookings));
+    
+    // Save to current user's bookings
+    if (currentUser) {
+        currentUser.paymentBookings = currentUser.paymentBookings || [];
+        currentUser.paymentBookings.push(bookingRecord);
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        
+        // Update in allUsers list
+        const allUsers = JSON.parse(localStorage.getItem('allUsers') || '[]');
+        const userIndex = allUsers.findIndex(u => u.id === currentUser.id);
+        if (userIndex !== -1) {
+            allUsers[userIndex] = currentUser;
+            localStorage.setItem('allUsers', JSON.stringify(allUsers));
+        }
+    }
+    
+    // Send payment confirmation email to user
+    const confirmationMessage = `
+Congratulations! Your booking is confirmed.
+
+=== BOOKING CONFIRMATION ===
+Booking ID: ${bookingId}
+Package: ${bookingRecord.packageName}
+Travelers: ${bookingRecord.travelers}
+Total Amount: ₹${bookingRecord.amount}
+Payment ID: ${response.razorpay_payment_id}
+Status: Payment Successful
+
+=== TRAVELER DETAILS ===
+Name: ${bookingRecord.name}
+Email: ${bookingRecord.email}
+Phone: ${bookingRecord.phone}
+
+Booking Date: ${bookingRecord.bookingDate}
+Booking Time: ${bookingRecord.bookingTime}
+
+Thank you for booking with HPY Moments! 
+Your payment has been successfully processed.
+
+Keep this booking ID safe for your records.
+    `;
+    
+    sendEmail(
+        bookingRecord.email,
+        bookingRecord.name,
+        '✅ Booking Confirmed - HPY Moments',
+        confirmationMessage
+    );
+    
+    // Send notification to admin
+    sendEmailToAdmin(
+        'aakash121767@gmail.com',
+        currentUser ? currentUser.name : bookingRecord.name,
+        '🎉 New Payment Booking - ' + bookingId,
+        `New booking received with payment!\n\nBooking ID: ${bookingId}\nPackage: ${bookingRecord.packageName}\nAmount: ₹${bookingRecord.amount}\nPayment ID: ${response.razorpay_payment_id}`,
+        bookingRecord
+    );
+    
+    // Populate success page
+    document.getElementById('success-booking-id').textContent = bookingId;
+    document.getElementById('success-package-name').textContent = bookingRecord.packageName;
+    document.getElementById('success-customer-name').textContent = bookingRecord.name;
+    document.getElementById('success-customer-email').textContent = bookingRecord.email;
+    document.getElementById('success-booking-date').textContent = bookingRecord.bookingDate;
+    document.getElementById('success-travelers').textContent = bookingRecord.travelers;
+    document.getElementById('success-amount').textContent = '₹' + bookingRecord.amount.toLocaleString();
+    
+    // Store for WhatsApp sharing
+    window.successBooking = bookingRecord;
+    
+    // Navigate to success page
+    navigateTo('success');
+    
+    console.log('✅ Payment successful! Booking ID:', bookingId);
+    console.log('📧 Confirmation emails sent');
+    console.log('💾 Booking saved to localStorage');
+}
+
+/**
+ * Handles failed or cancelled Razorpay payment
+ * Shows error message and allows retry
+ * @param {object} error - Razorpay error response (if any)
+ */
+function handleRazorpayError(error) {
+    console.error('❌ Payment error:', error);
+    
+    // Populate failure page
+    const errorMessage = error && error.description 
+        ? error.description 
+        : 'Payment was cancelled or failed. Please try again.';
+    
+    document.getElementById('failure-error-message').textContent = errorMessage;
+    
+    // Store booking for retry
+    window.failedBooking = window.bookingData;
+    
+    // Navigate to failure page
+    navigateTo('failure');
+}
+
+/**
+ * Retries the payment process
+ * Goes back to payment page to allow user to retry payment
+ */
+function retryPayment() {
+    if (window.failedBooking) {
+        window.bookingData = window.failedBooking;
+        navigateTo('payment');
+    } else {
+        alert('No previous booking found. Please start a new booking.');
+        navigateTo('packages');
+    }
+}
+
+/**
+ * Shares booking confirmation on WhatsApp
+ * Generates WhatsApp message with booking details and opens WhatsApp share dialog
+ */
+function shareOnWhatsApp() {
+    if (!window.successBooking) {
+        alert('No booking to share');
+        return;
+    }
+    
+    const booking = window.successBooking;
+    
+    // Create WhatsApp message
+    const whatsappMessage = `🎉 *Booking Confirmed!* 🎉
+
+*Booking Details:*
+📝 Booking ID: ${booking.bookingId}
+✈️ Package: ${booking.packageName}
+👥 Travelers: ${booking.travelers}
+💰 Amount: ₹${booking.amount}
+
+*Passenger Details:*
+👤 Name: ${booking.name}
+📧 Email: ${booking.email}
+📱 Phone: ${booking.phone}
+
+📅 Booking Date: ${booking.bookingDate}
+
+Thank you for booking with HPY Moments! 🌍`;
+    
+    // Encode message for URL
+    const encodedMessage = encodeURIComponent(whatsappMessage);
+    
+    // Generate WhatsApp share URL
+    const whatsappURL = `https://wa.me/?text=${encodedMessage}`;
+    
+    // Open WhatsApp (works on desktop and mobile)
+    window.open(whatsappURL, '_blank');
+    
+    console.log('📲 Opening WhatsApp with booking details...');
+}
+
+/**
+ * Copies booking ID to clipboard
+ * Shows success message after copying
+ */
+function copyBookingId() {
+    const bookingId = document.getElementById('success-booking-id').textContent;
+    
+    // Create temporary input element to copy from
+    const tempInput = document.createElement('input');
+    tempInput.value = bookingId;
+    document.body.appendChild(tempInput);
+    
+    // Select and copy
+    tempInput.select();
+    document.execCommand('copy');
+    
+    // Remove temporary element
+    document.body.removeChild(tempInput);
+    
+    // Show feedback
+    const copyBtn = event.target;
+    const originalText = copyBtn.textContent;
+    copyBtn.textContent = '✓ Copied!';
+    copyBtn.classList.add('bg-green-500');
+    copyBtn.classList.remove('bg-brand');
+    
+    // Revert after 2 seconds
+    setTimeout(() => {
+        copyBtn.textContent = originalText;
+        copyBtn.classList.remove('bg-green-500');
+        copyBtn.classList.add('bg-brand');
+    }, 2000);
+    
+    console.log('📋 Booking ID copied:', bookingId);
+}
+
+/**
+ * Cancels payment and goes back to packages
+ */
+function cancelPayment() {
+    window.bookingData = null;
+    window.currentPackage = null;
+    navigateTo('packages');
+}
 
