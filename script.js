@@ -731,8 +731,21 @@ function handleBooking(e) {
     const travelers = form.querySelector('input[name="travelers"]').value.trim();
     const transportMode = form.querySelector('select[name="transport"]').value.trim();
     
+    // Validate all fields
     if (!fullName || !email || !phone || !destination || !checkInDate || !travelers || !transportMode) {
-        alert('Please fill in all booking details');
+        showErrorNotification('❌ Please fill in all booking details');
+        return;
+    }
+    
+    // Validate email format
+    if (!isValidEmail(email)) {
+        showErrorNotification('❌ Please enter a valid email address');
+        return;
+    }
+    
+    // Validate phone format
+    if (!isValidIndianPhone(phone)) {
+        showErrorNotification('❌ Please enter a valid 10-digit phone number');
         return;
     }
     
@@ -749,7 +762,7 @@ function handleBooking(e) {
     }
     amount = amount * parseInt(travelers);
     
-    // Store booking data for fake payment
+    // Store booking data for payment processing
     window.bookingData = {
         name: fullName,
         email: email,
@@ -759,13 +772,46 @@ function handleBooking(e) {
         amount: amount,
         transport: transportMode,
         checkInDate: checkInDate,
-        id: Date.now()
+        timestamp: new Date().toLocaleDateString('en-IN')
     };
     
-    // Show our fake payment page
-    document.getElementById('fake-pay-dest').textContent = window.bookingData.packageName;
-    document.getElementById('fake-pay-amount').textContent = '₹' + window.bookingData.amount.toLocaleString();
+    // Populate payment page with booking summary
+    document.getElementById('pay-package-name').textContent = destination;
+    document.getElementById('pay-passenger-name').textContent = fullName;
+    document.getElementById('pay-travelers').textContent = travelers;
+    document.getElementById('pay-total-amount').textContent = '₹' + amount.toLocaleString('en-IN');
+    
+    // Navigate to payment view
     navigateTo('payment');
+}
+
+/**
+ * Updates the total booking price based on selected destination and travelers
+ * This function is called when destination or travelers change
+ */
+function updateBookingPrice() {
+    const destination = document.getElementById('booking-destination').value;
+    const travelers = parseInt(document.getElementById('booking-travelers').value) || 1;
+    
+    if (!destination) {
+        document.getElementById('booking-total-price').textContent = '₹0';
+        document.getElementById('booking-price-breakdown').textContent = 'Select a destination';
+        return;
+    }
+    
+    // Find destination or package
+    let match = destinations.find(d => d.name === destination);
+    if (!match) {
+        match = packages.find(p => p.dest === destination);
+    }
+    
+    if (match) {
+        const basePrice = parseInt(match.price.replace('₹', '').replace(/,/g, ''));
+        const totalPrice = basePrice * travelers;
+        
+        document.getElementById('booking-total-price').textContent = '₹' + totalPrice.toLocaleString('en-IN');
+        document.getElementById('booking-price-breakdown').textContent = `₹${basePrice.toLocaleString()} × ${travelers} traveler${travelers > 1 ? 's' : ''}`;
+    }
 }
 
 function resetBooking() {
@@ -807,6 +853,21 @@ window.addEventListener('scroll', () => {
 
 // Add event listener to search input to capture "Enter" key press
 document.addEventListener('DOMContentLoaded', () => {
+    // ===== BOOKING FORM LISTENERS =====
+    // Update price when destination changes
+    const destSelect = document.getElementById('booking-destination');
+    if (destSelect) {
+        destSelect.addEventListener('change', updateBookingPrice);
+    }
+    
+    // Update price when travelers changes
+    const travelersInput = document.getElementById('booking-travelers');
+    if (travelersInput) {
+        travelersInput.addEventListener('change', updateBookingPrice);
+        travelersInput.addEventListener('input', updateBookingPrice);
+    }
+    
+    // ===== HOME SEARCH LISTENERS =====
     const searchInput = document.getElementById('search-location');
     if(searchInput) {
         searchInput.addEventListener('keypress', function (e) {
@@ -817,7 +878,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // Add event listener for Explore page search bar
+    // ===== EXPLORE SEARCH LISTENERS =====
     const exploreSearchInput = document.getElementById('explore-search-location');
     if(exploreSearchInput) {
         // Show all places initially
@@ -853,7 +914,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // Add event listeners for region filter buttons
+    // ===== REGION FILTER LISTENERS =====
     const regionButtons = document.querySelectorAll('.region-filter-btn');
     regionButtons.forEach(btn => {
         btn.addEventListener('click', function () {
@@ -869,6 +930,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
     
+    // ===== INITIALIZE EVERYTHING =====
     initializeUserSession();
     updateNavbarForLoggedInUser();
     initData();
@@ -1000,75 +1062,60 @@ function handlePaymentBooking(e) {
 }
 
 /**
- * Initiates Razorpay payment
- * Creates a Razorpay checkout instance with test keys
+ * Initiates Fake Payment Process
+ * Simulates a payment request with loading state and realistic delay
+ * @param {Event} event - The form submit event
  */
-function initiateRazorpayPayment() {
-    // Validate booking data
-    if (!window.bookingData) {
-        alert('Please complete the booking form first');
+function initiateRazorpayPayment(event) {
+    // Prevent form default submission
+    if (event) event.preventDefault();
+    
+    // Validate booking data exists
+    if (!window.bookingData || !window.bookingData.amount) {
+        alert('❌ Booking details are missing. Please go back and try again.');
         return;
     }
     
-    // Get selected payment method (for reference, Razorpay handles all methods)
-    const selectedMethod = document.querySelector('input[name="payment-method"]:checked');
-    const paymentMethod = selectedMethod ? selectedMethod.value : 'card';
+    // Get the button element
+    const payButton = document.querySelector('button[onclick="initiateRazorpayPayment(event)"]') 
+                      || event.target.closest('button')
+                      || event.target;
     
-    // Razorpay checkout options
-    const options = {
-        // Test Key (provided by Razorpay - no real money involved)
-        key: 'rzp_test_1DP5MMOlF23ioK',
-        
-        // Amount in paise (1 rupee = 100 paise)
-        amount: window.bookingData.amount * 100,
-        
-        // Currency
-        currency: 'INR',
-        
-        // Payment description
-        name: 'HPY Moments Travel',
-        description: `Booking for ${window.bookingData.packageName}`,
-        
-        // Customer email and phone
-        prefill: {
-            name: window.bookingData.name,
-            email: window.bookingData.email,
-            contact: window.bookingData.phone
-        },
-        
-        // Razorpay theme color (matches brand color)
-        theme: {
-            color: '#ff5a5f'
-        },
-        
-        // Payment method preferences
-        method: {
-            upi: true,
-            card: true,
-            netbanking: true,
-            emandate: false,
-            cardless_emi: false,
-            paylater: false
-        },
-        
-        // Success callback
-        handler: handleRazorpaySuccess,
-        
-        // Error callback
-        modal: {
-            ondismiss: handleRazorpayError
-        }
-    };
-    
-    // Create Razorpay instance and open payment modal
-    try {
-        const razorpay = new Razorpay(options);
-        razorpay.on('payment.failed', handleRazorpayError);
-        razorpay.open();
-    } catch (error) {
-        console.error('❌ Razorpay initialization error:', error);
-        alert('Error initializing payment. Please try again.');
+    if (!payButton) {
+        console.warn('⚠️ Could not find pay button element');
+        return;
     }
+    
+    // Store original button content
+    const originalHTML = payButton.innerHTML;
+    const originalDisabledState = payButton.disabled;
+    
+    // Change button to loading state
+    payButton.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Processing Payment...';
+    payButton.disabled = true;
+    
+    // Simulate payment processing for 2.5 seconds
+    setTimeout(() => {
+        // Generate fake payment ID (realistic format)
+        const fakePaymentId = 'pay_mock_' + Math.random().toString(36).substr(2, 9).toUpperCase();
+        
+        // Create mock Razorpay response
+        const mockResponse = {
+            razorpay_payment_id: fakePaymentId,
+            razorpay_order_id: 'order_' + Date.now(),
+            razorpay_signature: 'mock_signature_' + Math.random().toString(36).substr(2, 5)
+        };
+        
+        console.log('✅ Fake payment processed:', mockResponse);
+        
+        // Reset button to original state
+        payButton.innerHTML = originalHTML;
+        payButton.disabled = originalDisabledState;
+        
+        // Handle the successful payment
+        handleRazorpaySuccess(mockResponse);
+        
+    }, 2500); // 2.5 second delay to simulate network request
 }
 
 /**
@@ -1183,87 +1230,8 @@ Keep this booking ID safe for your records.
     console.log('💾 Booking saved to localStorage');
 }
 
-/**
- * Handles failed or cancelled Razorpay payment
- * Shows error message and allows retry
- * @param {object} error - Razorpay error response (if any)
- */
-function handleRazorpayError(error) {
-    console.error('❌ Payment error:', error);
-    
-    const errorMessage = error && error.description 
-        ? error.description 
-        : 'Payment was cancelled or failed. Please try again.';
-    
-    alert(errorMessage);
-}
+// All Razorpay-related error handling is now integrated into initiateRazorpayPayment()
 
-// ------------------------------------------
-// MOCK PAYMENT LOGIC (Replacing Razorpay integration)
-// ------------------------------------------
-
-function handleFakePayment(e) {
-    e.preventDefault();
-    const btn = document.getElementById('fake-pay-btn');
-    const originalText = btn.innerHTML;
-    
-    // Simulate loading
-    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Processing...';
-    btn.disabled = true;
-    
-    setTimeout(() => {
-        btn.innerHTML = originalText;
-        btn.disabled = false;
-        
-        // Mock Razorpay response object
-        const mockResponse = {
-            razorpay_payment_id: 'pay_mock_' + Math.random().toString(36).substr(2, 9),
-            razorpay_signature: 'sign_mock_simulated_success'
-        };
-        
-        // Navigate back to the booking view so the success overlay appears in the correct context
-        navigateTo('booking');
-        
-        // Pass to the success handler
-        handleRazorpaySuccess(mockResponse);
-        
-        // Reset the form
-        document.getElementById('fake-payment-form').reset();
-    }, 1500); // Wait 1.5 seconds to simulate an API call
-}
-
-function cancelFakePayment() {
-    navigateTo('booking');
-}
-
-function switchPaymentMethod(method) {
-    const btnCard = document.getElementById('btn-pay-card');
-    const btnUpi = document.getElementById('btn-pay-upi');
-    const formCard = document.getElementById('card-payment-form');
-    const formUpi = document.getElementById('upi-payment-form');
-    
-    // Reset required attributes
-    const cardInputs = formCard.querySelectorAll('input');
-    const upiInput = document.getElementById('upi-input');
-
-    if (method === 'card') {
-        btnCard.className = 'w-1/2 py-2 text-sm font-bold rounded-lg bg-white shadow-sm text-dark transition-all duration-300';
-        btnUpi.className = 'w-1/2 py-2 text-sm font-bold rounded-lg text-gray-500 hover:text-dark transition-all duration-300';
-        formCard.classList.remove('hidden');
-        formUpi.classList.add('hidden');
-        
-        cardInputs.forEach(input => input.setAttribute('required', 'required'));
-        if (upiInput) upiInput.removeAttribute('required');
-    } else {
-        btnUpi.className = 'w-1/2 py-2 text-sm font-bold rounded-lg bg-white shadow-sm text-dark transition-all duration-300';
-        btnCard.className = 'w-1/2 py-2 text-sm font-bold rounded-lg text-gray-500 hover:text-dark transition-all duration-300';
-        formUpi.classList.remove('hidden');
-        formCard.classList.add('hidden');
-        
-        cardInputs.forEach(input => input.removeAttribute('required'));
-        if (upiInput) upiInput.setAttribute('required', 'required');
-    }
-}
 
 /**
  * Retries the payment process
@@ -1364,5 +1332,200 @@ function cancelPayment() {
     window.bookingData = null;
     window.currentPackage = null;
     navigateTo('packages');
+}
+
+// ==========================================
+// EMAIL & UTILITY FUNCTIONS
+// ==========================================
+
+/**
+ * Sends email notification using EmailJS or AlertBox (fallback)
+ * In production, integrate with EmailJS for real email functionality
+ * @param {string} email - Recipient email address
+ * @param {string} name - Recipient name
+ * @param {string} subject - Email subject
+ * @param {string} message - Email body message
+ */
+function sendEmail(email, name, subject, message) {
+    console.log('📧 Email Function Called');
+    console.log('To:', email);
+    console.log('Subject:', subject);
+    console.log('Message:', message);
+    
+    // OPTION 1: Using EmailJS (Recommended for production)
+    // Uncomment below after setting up EmailJS:
+    /*
+    emailjs.send('service_xxxxxxx', 'template_xxxxxxx', {
+        to_email: email,
+        to_name: name,
+        subject: subject,
+        message: message
+    }).then(response => {
+        console.log('✅ Email sent successfully:', response);
+    }).catch(error => {
+        console.error('❌ Email send failed:', error);
+    });
+    */
+    
+    // OPTION 2: Using backend API (e.g., Firebase Functions, Node.js)
+    // Uncomment and modify URL:
+    /*
+    fetch('https://your-backend.com/send-email', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({email, name, subject, message})
+    });
+    */
+    
+    // FALLBACK: Show in console and alert (development mode)
+    alert(`📧 Confirmation email sent to ${email}!\n\n${subject}\n\n${message}`);
+}
+
+/**
+ * Sends admin notification email
+ * @param {string} adminEmail - Admin email address
+ * @param {string} userName - User name for context
+ * @param {string} subject - Email subject
+ * @param {string} message - Email body
+ * @param {object} bookingRecord - Complete booking details
+ */
+function sendEmailToAdmin(adminEmail, userName, subject, message, bookingRecord) {
+    console.log('📧 Admin Notification Email');
+    console.log('To:', adminEmail);
+    console.log('User:', userName);
+    console.log('Details:', bookingRecord);
+    
+    // OPTION 1: EmailJS
+    /*
+    emailjs.send('service_xxxxxxx', 'template_admin', {
+        admin_email: adminEmail,
+        subject: subject,
+        message: message,
+        booking_data: JSON.stringify(bookingRecord)
+    });
+    */
+    
+    // OPTION 2: Backend API
+    /*
+    fetch('https://your-backend.com/notify-admin', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({adminEmail, userName, subject, message, bookingRecord})
+    });
+    */
+    
+    // Fallback: Just log it
+}
+
+/**
+ * Saves booking data to Google Sheets via Apps Script webhook
+ * Setup instructions: See RAZORPAY_INTEGRATION_GUIDE.md
+ * @param {object} bookingRecord - Complete booking details to save
+ */
+function saveBookingToGoogleSheets(bookingRecord) {
+    // Google Apps Script deployment URL (replace with your own)
+    const GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/d/{deploymentId}/usercontent/';
+    
+    // Only proceed if URL is configured
+    if (!GOOGLE_APPS_SCRIPT_URL || GOOGLE_APPS_SCRIPT_URL.includes('{')) {
+        console.log('⚠️ Google Sheets webhook not configured. Skipping.');
+        return;
+    }
+    
+    // Send POST request to Google Apps Script
+    fetch(GOOGLE_APPS_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: JSON.stringify(bookingRecord)
+    })
+    .then(() => console.log('✅ Booking saved to Google Sheets'))
+    .catch(error => console.error('❌ Google Sheets error:', error));
+}
+
+/**
+ * Generates and displays loading animation
+ * @param {string} message - Loading message to display
+ */
+function showLoadingAnimation(message = 'Processing your payment...') {
+    const loadingOverlay = document.createElement('div');
+    loadingOverlay.id = 'payment-loading-overlay';
+    loadingOverlay.className = 'fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50';
+    loadingOverlay.innerHTML = `
+        <div class="bg-white rounded-2xl p-8 text-center shadow-2xl animate-fadeIn max-w-sm">
+            <div class="mb-4">
+                <div class="inline-block">
+                    <div class="w-16 h-16 border-4 border-brand border-t-transparent rounded-full animate-spin"></div>
+                </div>
+            </div>
+            <h3 class="text-lg font-bold text-dark mb-2">${message}</h3>
+            <p class="text-gray-500 text-sm">Please wait while we process your payment securely.</p>
+        </div>
+    `;
+    document.body.appendChild(loadingOverlay);
+    return loadingOverlay;
+}
+
+/**
+ * Hides loading animation
+ */
+function hideLoadingAnimation() {
+    const overlay = document.getElementById('payment-loading-overlay');
+    if (overlay) {
+        overlay.remove();
+    }
+}
+
+/**
+ * Shows success notification with animation
+ * @param {string} message - Success message
+ * @param {number} duration - Duration to show (ms)
+ */
+function showSuccessNotification(message, duration = 3000) {
+    const notification = document.createElement('div');
+    notification.className = 'fixed top-6 right-6 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg animate-slideIn z-50 flex items-center gap-2';
+    notification.innerHTML = `<i class="fa-solid fa-check-circle"></i> ${message}`;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.classList.add('animate-slideOut');
+        setTimeout(() => notification.remove(), 300);
+    }, duration);
+}
+
+/**
+ * Shows error notification with animation
+ * @param {string} message - Error message
+ * @param {number} duration - Duration to show (ms)
+ */
+function showErrorNotification(message, duration = 4000) {
+    const notification = document.createElement('div');
+    notification.className = 'fixed top-6 right-6 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg animate-slideIn z-50 flex items-center gap-2';
+    notification.innerHTML = `<i class="fa-solid fa-exclamation-circle"></i> ${message}`;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.classList.add('animate-slideOut');
+        setTimeout(() => notification.remove(), 300);
+    }, duration);
+}
+
+/**
+ * Validates Indian phone number format
+ * @param {string} phone - Phone number to validate
+ * @returns {boolean} True if valid
+ */
+function isValidIndianPhone(phone) {
+    const phoneRegex = /^[6-9]\d{9}$/; // Indian numbers start with 6-9
+    return phoneRegex.test(phone.replace(/\D/g, ''));
+}
+
+/**
+ * Validates email format
+ * @param {string} email - Email to validate
+ * @returns {boolean} True if valid
+ */
+function isValidEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
 }
 

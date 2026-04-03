@@ -43,3 +43,207 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .glass-input-hover:hover {
     background-color: rgba(255, 255, 255, 0.2);
 }
+
+/* ==========================================
+   PAYMENT ANIMATIONS & TRANSITIONS
+   ========================================= */
+
+/* Fade In Animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.animate-fadeIn {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Pulse Animation for success icon */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Spin Animation for loading */
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.animate-spin {
+    animation: spin 1s linear infinite;
+}
+
+/* Slide In Animation for notifications */
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.animate-slideIn {
+    animation: slideIn 0.3s ease-out;
+}
+
+/* Slide Out Animation for notifications */
+@keyframes slideOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+.animate-slideOut {
+    animation: slideOut 0.3s ease-in;
+}
+
+/* Scale Up Animation */
+@keyframes scaleUp {
+    from {
+        transform: scale(0.95);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.animate-scaleUp {
+    animation: scaleUp 0.3s ease-out;
+}
+
+/* Bounce Animation */
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.animate-bounce {
+    animation: bounce 2s infinite;
+}
+
+/* Shimmer Loading Animation */
+@keyframes shimmer {
+    0% {
+        background-position: -1000px 0;
+    }
+    100% {
+        background-position: 1000px 0;
+    }
+}
+
+.animate-shimmer {
+    animation: shimmer 2s infinite;
+    background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.2) 20%,
+        rgba(255, 255, 255, 0.5) 60%,
+        rgba(255, 255, 255, 0)
+    );
+    background-size: 1000px 100%;
+}
+
+/* Payment Processing Animation */
+@keyframes paymentProcess {
+    0% {
+        box-shadow: 0 0 0 0 rgba(255, 90, 95, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 20px rgba(255, 90, 95, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(255, 90, 95, 0);
+    }
+}
+
+.animate-paymentProcess {
+    animation: paymentProcess 2s infinite;
+}
+
+/* Success Checkmark Animation */
+@keyframes checkmark {
+    0% {
+        stroke-dashoffset: 50;
+    }
+    100% {
+        stroke-dashoffset: 0;
+    }
+}
+
+.animate-checkmark {
+    animation: checkmark 0.6s ease-in-out;
+}
+
+/* Gradient shift animation */
+@keyframes gradientShift {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+.animate-gradientShift {
+    background-size: 200% 200%;
+    animation: gradientShift 3s ease infinite;
+}
+
+/* Smooth Button Hover */
+button {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+button:active {
+    transform: scale(0.98);
+}
+
+/* Input Focus Animation */
+input:focus, select:focus, textarea:focus {
+    transition: all 0.2s ease-out;
+}
+
+/* Success State */
+.success-state {
+    background-color: #f0fdf4;
+    border-color: #22c55e;
+    color: #16a34a;
+}
+
+/* Error State */
+.error-state {
+    background-color: #fef2f2;
+    border-color: #ef4444;
+    color: #dc2626;
+}
