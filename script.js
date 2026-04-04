@@ -532,6 +532,180 @@ function handleLogout() {
     }
 }
 
+// ========================================
+// FORGOT PASSWORD FUNCTIONALITY
+// ========================================
+
+/**
+ * Opens the forgot password modal
+ */
+function openForgotPasswordModal() {
+    const modal = document.getElementById('forgot-password-modal');
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+/**
+ * Closes the forgot password modal
+ */
+function closeForgotPasswordModal() {
+    const modal = document.getElementById('forgot-password-modal');
+    modal.classList.add('hidden');
+    document.body.style.overflow = 'auto';
+    
+    // Reset form
+    document.getElementById('forgot-email-form').classList.remove('hidden');
+    document.getElementById('forgot-reset-form').classList.add('hidden');
+    document.getElementById('forgot-email-input').value = '';
+    document.getElementById('new-password-input').value = '';
+    document.getElementById('confirm-password-input').value = '';
+}
+
+/**
+ * Handles forgot password email submission
+ * Verifies if user exists and shows password reset form
+ */
+function handleForgotPasswordEmail(event) {
+    event.preventDefault();
+    
+    const email = document.getElementById('forgot-email-input').value.trim();
+    
+    if (!email) {
+        alert('❌ Please enter your email address');
+        return;
+    }
+    
+    // Find user by email
+    const allUsers = JSON.parse(localStorage.getItem('allUsers') || '[]');
+    const user = allUsers.find(u => u.email === email);
+    
+    if (!user) {
+        alert('❌ No account found with this email address');
+        return;
+    }
+    
+    // Store the email temporarily for password reset
+    window.resetPasswordEmail = email;
+    
+    // Send password reset email notification
+    const resetMessage = `
+🔐 PASSWORD RESET REQUEST 🔐
+
+Hello ${user.name},
+
+We received a request to reset your password for your HPY Moments account.
+
+To complete the password reset process, please return to the login page and:
+1. Click "Forgot?" again
+2. Enter your email: ${email}
+3. Enter your new password
+4. Click "Update Password"
+
+This reset link is valid for this session only.
+
+If you did not request this password reset, you can safely ignore this email. Your account is still secure.
+
+Safe travels! 🌍✈️
+    `;
+    
+    sendEmail(
+        email,
+        user.name,
+        '🔐 Password Reset Request - HPY Moments',
+        resetMessage
+    );
+    
+    // Show reset password form
+    document.getElementById('forgot-email-form').classList.add('hidden');
+    document.getElementById('forgot-reset-form').classList.remove('hidden');
+    document.getElementById('forgot-title').textContent = 'Create New Password';
+    document.getElementById('forgot-subtitle').textContent = 'Enter your new password to reset access';
+    document.getElementById('reset-email-display').textContent = `📧 Reset password for: ${email}`;
+    
+    console.log('✅ Password reset email sent to:', email);
+}
+
+/**
+ * Handles password reset submission
+ * Updates user password in localStorage
+ */
+function handlePasswordReset(event) {
+    event.preventDefault();
+    
+    const newPassword = document.getElementById('new-password-input').value;
+    const confirmPassword = document.getElementById('confirm-password-input').value;
+    const email = window.resetPasswordEmail;
+    
+    // Validation
+    if (!newPassword || !confirmPassword) {
+        alert('❌ Please fill in all fields');
+        return;
+    }
+    
+    if (newPassword.length < 6) {
+        alert('❌ Password must be at least 6 characters long');
+        return;
+    }
+    
+    if (newPassword !== confirmPassword) {
+        alert('❌ Passwords do not match');
+        return;
+    }
+    
+    // Update password in users database
+    const allUsers = JSON.parse(localStorage.getItem('allUsers') || '[]');
+    const userIndex = allUsers.findIndex(u => u.email === email);
+    
+    if (userIndex === -1) {
+        alert('❌ User not found');
+        return;
+    }
+    
+    // Update password
+    allUsers[userIndex].password = newPassword;
+    localStorage.setItem('allUsers', JSON.stringify(allUsers));
+    
+    // Update current user if logged in
+    if (currentUser && currentUser.email === email) {
+        currentUser.password = newPassword;
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    }
+    
+    // Send confirmation email
+    const confirmationMessage = `
+✅ PASSWORD RESET SUCCESSFUL ✅
+
+Hello ${allUsers[userIndex].name},
+
+Your password has been successfully reset!
+
+You can now log in with your new password.
+
+For security reasons:
+- Don't share your password with anyone
+- Never respond to emails asking for your password
+- Always log out after using shared devices
+
+If this wasn't you, please contact our support team immediately.
+
+Safe travels! 🌍✈️
+    `;
+    
+    sendEmail(
+        email,
+        allUsers[userIndex].name,
+        '✅ Password Reset Successful - HPY Moments',
+        confirmationMessage
+    );
+    
+    // Close modal and show success
+    alert('✅ Password updated successfully! Please log in with your new password.');
+    closeForgotPasswordModal();
+    
+    // Clear reset password email from memory
+    window.resetPasswordEmail = null;
+}
+
 // Update Navbar for Logged In User
 function updateNavbarForLoggedInUser() {
     const authButtons = document.getElementById('auth-buttons');
@@ -1207,6 +1381,56 @@ Keep this booking ID safe for your records.
         `New booking received with payment!\n\nBooking ID: ${bookingId}\nPackage: ${bookingRecord.packageName}\nAmount: ₹${bookingRecord.amount}\nPayment ID: ${response.razorpay_payment_id}`,
         bookingRecord
     );
+    
+    // Send booking confirmation to logged-in user's email
+    if (currentUser && currentUser.email) {
+        const userConfirmationMessage = `
+🎉 BOOKING CONFIRMATION 🎉
+
+Hello ${currentUser.name},
+
+Your booking has been successfully confirmed and payment has been processed!
+
+═══════════════════════════════════════
+📋 BOOKING DETAILS
+═══════════════════════════════════════
+Booking ID: ${bookingId}
+Package: ${bookingRecord.packageName}
+Destination: ${bookingRecord.destination}
+Number of Travelers: ${bookingRecord.travelers}
+Total Amount: ₹${bookingRecord.amount}
+Payment Status: ✅ Confirmed
+
+═══════════════════════════════════════
+👤 TRAVELER INFORMATION
+═══════════════════════════════════════
+Name: ${bookingRecord.name}
+Email: ${bookingRecord.email}
+Phone: ${bookingRecord.phone}
+Transport Mode: ${bookingRecord.transport.toUpperCase()}
+Check-in Date: ${bookingRecord.checkInDate}
+
+═══════════════════════════════════════
+💳 PAYMENT INFORMATION
+═══════════════════════════════════════
+Payment ID: ${bookingRecord.paymentId}
+Booking Date: ${bookingRecord.bookingDate}
+Booking Time: ${bookingRecord.bookingTime}
+
+═══════════════════════════════════════
+
+Thank you for booking with HPY Moments!
+
+Keep this booking ID safe for your records.
+        `;
+        
+        sendEmail(
+            currentUser.email,
+            currentUser.name,
+            '✅ Booking Confirmed - HPY Moments Travel',
+            userConfirmationMessage
+        );
+    }
     
     // Populate success page if elements exist
     const successBookingId = document.getElementById('success-booking-id');

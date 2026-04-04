@@ -149,6 +149,19 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     animation: bounce 2s infinite;
 }
 
+/* ==========================================
+   RESPONSIVE NAVBAR - DESKTOP-ONLY BUTTONS
+   ========================================= */
+
+/* Ensure desktop auth/profile buttons NEVER appear on mobile,
+   even when JavaScript removes the 'hidden' Tailwind class */
+@media (max-width: 767px) {
+    #auth-buttons,
+    #profile-buttons {
+        display: none !important;
+    }
+}
+
 /* Shimmer Loading Animation */
 @keyframes shimmer {
     0% {
