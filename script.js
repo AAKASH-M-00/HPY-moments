@@ -1228,6 +1228,9 @@ Keep this booking ID safe for your records.
     console.log('✅ Payment successful! Booking ID:', bookingId);
     console.log('📧 Confirmation emails sent');
     console.log('💾 Booking saved to localStorage');
+    
+    // Navigate to booking view to display the "Booking Completed" success message
+    navigateTo('booking');
 }
 
 // All Razorpay-related error handling is now integrated into initiateRazorpayPayment()
@@ -1351,33 +1354,6 @@ function sendEmail(email, name, subject, message) {
     console.log('To:', email);
     console.log('Subject:', subject);
     console.log('Message:', message);
-    
-    // OPTION 1: Using EmailJS (Recommended for production)
-    // Uncomment below after setting up EmailJS:
-    /*
-    emailjs.send('service_xxxxxxx', 'template_xxxxxxx', {
-        to_email: email,
-        to_name: name,
-        subject: subject,
-        message: message
-    }).then(response => {
-        console.log('✅ Email sent successfully:', response);
-    }).catch(error => {
-        console.error('❌ Email send failed:', error);
-    });
-    */
-    
-    // OPTION 2: Using backend API (e.g., Firebase Functions, Node.js)
-    // Uncomment and modify URL:
-    /*
-    fetch('https://your-backend.com/send-email', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({email, name, subject, message})
-    });
-    */
-    
-    // FALLBACK: Show in console and alert (development mode)
     alert(`📧 Confirmation email sent to ${email}!\n\n${subject}\n\n${message}`);
 }
 
